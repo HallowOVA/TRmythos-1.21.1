@@ -11,8 +11,6 @@ import io.github.manasmods.tensura.registry.effect.TensuraMobEffects;
 import io.github.manasmods.tensura.storage.TensuraStorages;
 import io.github.manasmods.tensura.storage.ep.IExistence;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;

@@ -5,7 +5,6 @@ import com.github.propheticeclipse.tensurastarlight.effect.buff.RemnantsOfAscens
 import com.github.propheticeclipse.tensurastarlight.effect.buff.ShapeForgottenArmorEffect;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
-import io.github.Memoires.mysticism.effect.ability.CultivatingEffect;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 

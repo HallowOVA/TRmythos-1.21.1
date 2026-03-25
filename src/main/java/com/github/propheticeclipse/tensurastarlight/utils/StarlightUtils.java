@@ -1,8 +1,6 @@
 package com.github.propheticeclipse.tensurastarlight.utils;
 
-import io.github.Memoires.mysticism.handler.SkillHandlers;
 import io.github.manasmods.manascore.race.api.SpawnPointHelper;
-import io.github.manasmods.manascore.skill.api.SkillAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;

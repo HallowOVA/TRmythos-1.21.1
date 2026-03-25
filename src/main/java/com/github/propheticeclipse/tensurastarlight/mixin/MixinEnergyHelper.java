@@ -1,14 +1,7 @@
 package com.github.propheticeclipse.tensurastarlight.mixin;
 
 import com.github.propheticeclipse.tensurastarlight.registry.skills.StarlightUniqueSkills;
-import io.github.Memoires.mysticism.ability.skill.unique.KyuremSkill;
-import io.github.Memoires.mysticism.ability.skill.unique.ReducerSkill;
-import io.github.Memoires.mysticism.registry.effects.MysticismMobEffects;
-import io.github.Memoires.mysticism.registry.skill.UniqueMysticismSkills;
-import io.github.manasmods.manascore.skill.api.ManasSkill;
 import io.github.manasmods.tensura.ability.SkillUtils;
-import io.github.manasmods.tensura.registry.effect.TensuraMobEffects;
-import io.github.manasmods.tensura.storage.TensuraStorages;
 import io.github.manasmods.tensura.util.EnergyHelper;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
