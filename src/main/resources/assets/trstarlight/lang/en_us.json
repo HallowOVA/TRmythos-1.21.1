@@ -24,6 +24,7 @@
 
   "trstarlight.skill.vestiges_of_eidolons": "Vestiges of Eidolons",
   "trstarlight.skill.vestiges_of_eidolons.description": "§oWhat fades does not vanish. What is gone still lingers. It listens to silence, and weaves truth from what remains.",
+
   "trstarlight.skill.mode.vestiges_of_eidolons.solar_echo": "Solar Echo",
   "trstarlight.skill.mode.vestiges_of_eidolons.judgement_of_past": "Judgement of Past",
   "trstarlight.skill.mode.vestiges_of_eidolons.death_bypass": "Death Bypass",
@@ -36,6 +37,7 @@
   "effect.trstarlight.shape_forgotten_armor": "SF: Shifting Armor",
 
   "trstarlight.skill.mode.default": "No Actives",
+
   "trstarlight.generic.spawnpoint_not_located": "Failed to locate spawnpoint, if issue persist after sleeping, contact Dev of TRStarlight.",
   "trstarlight.generic.skill.single_skill.sacrifice": "§fSkill %1$s §fwas §4sacrificed§f.§r",
   "trstarlight.generic.skill.success": "Success.",
@@ -47,6 +49,22 @@
   "trstarlight.generic.skill.ultimate": "Ultimate Skill %1$s has been acquired.",
   "trstarlight.generic.skill.ultimate.evolution": "Ultimate Skill %1$s will now undergo evolution.",
 
-  "trstarlight.race.lesser_aspect_born": "LETS GO FUCKING GOOING!!!!",
-  "trstarlight.race.lesser_aspect_born.description": "LETS FUCKING GET NUTTING!!!!"
+  "trstarlight.race.lesser_aspect_born": "Lesser Aspectborn",
+  "trstarlight.race.lesser_aspect_born.description": "A spiritual life-form immersed within the physical plane..\nWeakened to a mere fragment, perhaps capable of amassing once more into a grand aspect of the §kDivine§r.",
+  "trstarlight.race.aspect_born": "Aspectborn",
+  "trstarlight.race.greater_aspect_born": "Greater Aspectborn",
+
+  "trstarlight.race.lesser_convergence_born": "Lesser Convergence Aspectborn",
+  "trstarlight.race.convergence_born": "Convergence Aspectborn",
+  "trstarlight.race.greater_convergence_born": "Greater Convergence Aspectborn",
+  "trstarlight.race.elder_convergence_born": "Grand Convergence Aspectborn",
+
+  "trstarlight.race.lesser_memory_born": "Lesser Memory Aspectborn",
+  "trstarlight.race.memory_born": "Memory Aspectborn",
+  "trstarlight.race.greater_memory_born": "Greater Memory Aspectborn",
+  "trstarlight.race.grand_memory_born": "Grand Memory Aspectborn",
+
+  "trstarlight.race.false_aspect_of_regression": "Regr§kes§rs§kion§r - As§kpe§r§kct§r of §kRejection§r",
+  "trstarlight.race.aspect_of_regression": "Regression - Aspect of Restoration",
+  "trstarlight.race.mythos": "Mythos - Aspect of Eternity"
 }

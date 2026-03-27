@@ -3,6 +3,7 @@ package com.github.propheticeclipse.tensurastarlight.race.personal.aspectborn;
 import com.github.propheticeclipse.tensurastarlight.config.StarlightCommon;
 import com.github.propheticeclipse.tensurastarlight.config.races.aspectBornRaceConfig;
 import com.github.propheticeclipse.tensurastarlight.race.StarlightRace;
+import com.github.propheticeclipse.tensurastarlight.registry.StarlightRaces;
 import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.race.api.ManasRace;
 import io.github.manasmods.manascore.race.api.ManasRaceInstance;
@@ -10,6 +11,7 @@ import io.github.manasmods.manascore.skill.api.ManasSkill;
 import io.github.manasmods.manascore.skill.api.SkillAPI;
 import io.github.manasmods.tensura.config.race.RaceConfig;
 import io.github.manasmods.tensura.registry.race.TensuraRaces;
+import io.github.manasmods.tensura.storage.Alignment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
@@ -35,20 +37,29 @@ public class lesserAspectBornRace extends StarlightRace {
         return (ConfigRegistry.getConfig(aspectBornRaceConfig.class)).lesserAspectBorn;
     }
 
+    public Alignment getAlignment() {
+        return Alignment.MAJIN;
+    }
+
     public @Nullable ManasRace getDefaultEvolution(ManasRaceInstance instance, LivingEntity entity) {
-        return (ManasRace) TensuraRaces.BEAST_LORD.get();
+        return StarlightRaces.ASPECT_BORN.get();
     }
 
     public @Nullable ManasRace getAwakeningEvolution(ManasRaceInstance instance, LivingEntity entity) {
-        return (ManasRace)TensuraRaces.SPIRIT_BEAST.get();
+        return StarlightRaces.GREATER_ASPECT_BORN.get();
     }
 
     public @Nullable ManasRace getHarvestFestivalEvolution(ManasRaceInstance instance, LivingEntity entity) {
-        return (ManasRace)TensuraRaces.BEAST_LORD.get();
+        return StarlightRaces.ASPECT_BORN.get();
     }
 
     public List<ManasRace> getNextEvolutions(ManasRaceInstance instance, LivingEntity entity) {
-        return List.of((ManasRace)TensuraRaces.BEAST_LORD.get());
+        if () {
+
+        } else {
+
+        }
+        return List.of(StarlightRaces.ASPECT_BORN.get());
     }
 
     public List<ManasSkill> getIntrinsicSkills(ManasRaceInstance instance, LivingEntity entity) {

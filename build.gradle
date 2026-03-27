@@ -148,6 +148,7 @@ dependencies {
     compileOnly "curse.maven:saucelib-1453853:7817011"
     compileOnly "curse.maven:malum-484064:7307339"
     compileOnly "curse.maven:lodestone-616457:7264731"
+    compileOnly "curse.maven:gaze-a-malum-addon-1273454:7261638"
     compileOnly fileTree(dir: 'libs', include: '*.jar')
 
     localRuntime "curse.maven:placebo-283644:6926281"
@@ -157,6 +158,7 @@ dependencies {
     localRuntime "curse.maven:saucelib-1453853:7817011"
     localRuntime "curse.maven:malum-484064:7307339"
     localRuntime "curse.maven:lodestone-616457:7264731"
+    localRuntime "curse.maven:gaze-a-malum-addon-1273454:7261638"
     localRuntime fileTree(dir: 'libs', include: '*.jar')
 }
 

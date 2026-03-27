@@ -1,22 +1,26 @@
 package com.github.propheticeclipse.tensurastarlight.race.personal.aspectborn.trueAspect.memoryAspect;
 
+import com.github.propheticeclipse.tensurastarlight.config.StarlightCommon;
 import com.github.propheticeclipse.tensurastarlight.config.races.aspectBornRaceConfig;
+import com.github.propheticeclipse.tensurastarlight.race.personal.aspectborn.aspectBornRace;
+import com.github.propheticeclipse.tensurastarlight.registry.StarlightRaces;
 import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.race.api.ManasRace;
 import io.github.manasmods.manascore.race.api.ManasRaceInstance;
 import io.github.manasmods.manascore.skill.api.ManasSkill;
+import io.github.manasmods.manascore.skill.api.SkillAPI;
 import io.github.manasmods.tensura.config.race.RaceConfig;
-import io.github.manasmods.tensura.race.template.DefaultRace;
-import io.github.manasmods.tensura.registry.race.TensuraRaces;
-import io.github.manasmods.tensura.registry.skill.ExtraSkills;
-import io.github.manasmods.tensura.registry.skill.IntrinsicSkills;
+import io.github.manasmods.tensura.race.template.EvolutionRequirement;
+import io.github.manasmods.tensura.storage.Alignment;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-public class lesserMemoryBornRace extends DefaultRace {
+public class lesserMemoryBornRace extends aspectBornRace {
     public lesserMemoryBornRace(Difficulty difficulty) {
         super(difficulty);
     }
@@ -27,30 +31,48 @@ public class lesserMemoryBornRace extends DefaultRace {
     }
 
     public RaceConfig.Default getDefaultConfig() {
-        return (ConfigRegistry.getConfig(aspectBornRaceConfig.class)).lesserAspectBorn;
+        return (ConfigRegistry.getConfig(aspectBornRaceConfig.class)).greaterAspectBorn;
+    }
+    
+    public StarlightCommon.RaceDefault getAttributeDefaultConfig() {
+        return (ConfigRegistry.getConfig(aspectBornRaceConfig.class)).greaterAspectBorn;
+    }
+
+    public Alignment getAlignment() {
+        return Alignment.MAJIN;
     }
 
     public @Nullable ManasRace getDefaultEvolution(ManasRaceInstance instance, LivingEntity entity) {
-        return (ManasRace) TensuraRaces.BEAST_LORD.get();
+        return StarlightRaces.LESSER_CONVERGENCE_BORN.get();
     }
 
     public @Nullable ManasRace getAwakeningEvolution(ManasRaceInstance instance, LivingEntity entity) {
-        return (ManasRace)TensuraRaces.SPIRIT_BEAST.get();
+        return StarlightRaces.CONVERGENCE_BORN.get();
     }
 
     public @Nullable ManasRace getHarvestFestivalEvolution(ManasRaceInstance instance, LivingEntity entity) {
-        return (ManasRace)TensuraRaces.BEAST_LORD.get();
+        return StarlightRaces.LESSER_CONVERGENCE_BORN.get();
     }
 
     public List<ManasRace> getNextEvolutions(ManasRaceInstance instance, LivingEntity entity) {
-        return List.of((ManasRace)TensuraRaces.BEAST_LORD.get());
+        return List.of(StarlightRaces.LESSER_CONVERGENCE_BORN.get());
+    }
+
+    @Override
+    public float getEvolutionProgress(ManasRaceInstance instance, LivingEntity entity, ManasRace evolution) {
+        return super.getEvolutionProgress(instance, entity, evolution);
+    }
+
+    @Override
+    public Map<EvolutionRequirement, Float> getEvolutionRequirements(ManasRaceInstance previous, LivingEntity entity) {
+        return super.getEvolutionRequirements(previous, entity);
     }
 
     public List<ManasSkill> getIntrinsicSkills(ManasRaceInstance instance, LivingEntity entity) {
-        List<ManasSkill> list = new ArrayList();
-        list.add(IntrinsicSkills.POSSESSION.get());
-        list.add((ExtraSkills.DANGER_SENSE.get()));
-
-        return list;
+        return ConfigRegistry.getConfig(aspectBornRaceConfig.class)
+                .greaterAspectBorn.greaterAspectBornIntrinsics.stream()
+                .map(id -> (ManasSkill) SkillAPI.getSkillRegistry().get(ResourceLocation.parse(id)))
+                .filter(Objects::nonNull)
+                .toList();
     }
 }
