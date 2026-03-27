@@ -1,9 +1,11 @@
 package com.github.propheticeclipse.tensurastarlight.ability.skill.unique.evolvedUnique;
 
+import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
 import com.github.propheticeclipse.tensurastarlight.registry.StarlightEffects;
 import com.github.propheticeclipse.tensurastarlight.registry.skills.StarlightUniqueSkills;
 import dev.shadowsoffire.apothic_attributes.api.ALObjects;
 import dev.shadowsoffire.placebo.color.GradientColor;
+import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.network.api.util.Changeable;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.manascore.skill.api.SkillAPI;
@@ -37,7 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class RemnantsOfAscensionSkill extends Skill {
     public static final ResourceLocation REMNANTS_OF_ASCENSION;
-
+    private static final aspectSeriesSkillConfig.RemnantsOfAscension CONFIG;
     public RemnantsOfAscensionSkill() {
         super(SkillType.UNIQUE);
     }
@@ -105,7 +107,7 @@ Temporarily affects all beneficial effects and negative status effects.*/
 
     @Override
     public int getAcquirementMastery(LivingEntity entity) {
-        return 1;
+        return CONFIG.acquirementMastery;
     }
 
     @Override
@@ -178,7 +180,7 @@ Temporarily affects all beneficial effects and negative status effects.*/
     }
 
     public double getAcquiringMagiculeCost(ManasSkillInstance instance) {
-        return 150000;
+        return CONFIG.magiculeAcquirementCost;
     }
 
     public int getModes(ManasSkillInstance instance) {
@@ -199,7 +201,7 @@ Temporarily affects all beneficial effects and negative status effects.*/
     public double getMagiculeCost(LivingEntity entity, ManasSkillInstance instance, int mode) {
         double cost;
         switch (mode) {
-            case 0 -> cost = 500.0;
+            case 0 -> cost = 0.0;
             case 1 -> cost = 500.0;
             default -> cost = 0.0;
         }
@@ -234,8 +236,8 @@ Temporarily affects all beneficial effects and negative status effects.*/
 
     private void ExistenceRegeneration(LivingEntity entity, ManasSkillInstance instance) {
         IExistence existence = TensuraStorages.getExistenceFrom(entity);
-        double manaIncrease = isMastered(instance, entity) ? 40 : 20;
-        double auraIncrease = isMastered(instance, entity) ? 40 : 20;
+        double manaIncrease = isMastered(instance, entity) ? CONFIG.existenceMPRegenMastered : CONFIG.existenceMPRegenUnmastered;
+        double auraIncrease = isMastered(instance, entity) ? CONFIG.existenceAPRegenMastered : CONFIG.existenceAPRegenUnmastered;
 
         existence.setMagicule(existence.getMagicule() + manaIncrease);
         existence.setAura(existence.getAura() + auraIncrease);
@@ -248,10 +250,10 @@ Temporarily affects all beneficial effects and negative status effects.*/
         [Passive - Toggle] Fracture the Core:
         Increase base attack damage by 1.25x, Increase Crit Damage by +0.5x, Penetrate 8 levels of protection, and Penetrate 5% of armor.
          */
-        double attackModifier = 0.25;
-        double critDamageModifier = 0.5;
-        double armPierceModifier = 0.05;
-        double protPierceModifier = 8;
+        double attackModifier = CONFIG.coreFractureAttackMod;
+        double critDamageModifier = CONFIG.coreFractureCritDamageMod;
+        double armPierceModifier = CONFIG.coreFractureArmorShredMod;
+        double protPierceModifier = CONFIG.coreFractureProtPierceMod;
         AttributeInstance attack = entity.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attack != null && !attack.hasModifier(REMNANTS_OF_ASCENSION)) {
             attack.addOrReplacePermanentModifier(new AttributeModifier(REMNANTS_OF_ASCENSION, attackModifier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
@@ -298,10 +300,10 @@ Temporarily affects all beneficial effects and negative status effects.*/
 
     @Override
     public void onRespawn(ManasSkillInstance instance, ServerPlayer owner, boolean conqueredEnd) {
-        double attackModifier = 0.25;
-        double critDamageModifier = 0.5;
-        double armPierceModifier = 0.05;
-        double protPierceModifier = 8;
+        double attackModifier = CONFIG.coreFractureAttackMod;
+        double critDamageModifier = CONFIG.coreFractureCritDamageMod;
+        double armPierceModifier = CONFIG.coreFractureArmorShredMod;
+        double protPierceModifier = CONFIG.coreFractureProtPierceMod;
         AttributeInstance attack = owner.getAttribute(TensuraAttributes.AURA_GAIN);
         if (attack != null && !attack.hasModifier(REMNANTS_OF_ASCENSION)) {
             attack.addOrReplacePermanentModifier(new AttributeModifier(REMNANTS_OF_ASCENSION, attackModifier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
@@ -332,19 +334,19 @@ Temporarily affects all beneficial effects and negative status effects.*/
         double originalDamageNum = amount.get();
         MobEffectInstance buff = owner.getEffect(TensuraMobEffects.getReference(StarlightEffects.REMNANT_ASCENSION_ARMOR));
 
-        if (originalDamageNum >= 10) {
+        if (originalDamageNum >= CONFIG.shiftingFormDamageTrigger) {
             int i = 0;
-            int originalDuration = 100;
+            int originalDuration = CONFIG.shiftingFormDurationFirstHit;
             int duration;
             if (buff != null) {
-                duration = buff.getDuration() + 50;
-                i = (duration - originalDuration) / (300);
+                duration = buff.getDuration() + CONFIG.shiftingFormDurationConsecutiveHit;
+                i = (duration - originalDuration) / (CONFIG.shiftingFormAmpliDurationScaling);
                 addMasteryPoint(instance, owner);
             } else {
                 duration = originalDuration;
             }
-            if (i > 9) {
-                i = 9;
+            if (i > CONFIG.shiftingFormBuffMaxAmplifier) {
+                i = CONFIG.shiftingFormBuffMaxAmplifier;
             }
 
             if (EnergyHelper.isOutOfEnergy(owner, instance, 1, i)) {
@@ -356,7 +358,7 @@ Temporarily affects all beneficial effects and negative status effects.*/
 
             if (buff != null) {
                 int j = (buff.getAmplifier() + 1);
-                double damageModifier = isMastered(instance, owner) ? 10 : 5;
+                double damageModifier = isMastered(instance, owner) ? CONFIG.damageNegationMastered : CONFIG.damageNegationUnmastered;
                 double totalReduction = damageModifier * j;
 
 
@@ -365,10 +367,10 @@ Temporarily affects all beneficial effects and negative status effects.*/
         }
         // Resist 20% Magic and Elemental damage, up to a limit of 500 (1000 Mastered). Damage resisted by this effect are translated into barrier points
 
-        double damageModifier = 0.8;
+        double damageModifier = CONFIG.elementalDamageResistanceMod;
         double reducedDamageTotal = (originalDamageNum * damageModifier);
         double damageDifference = (originalDamageNum - reducedDamageTotal);
-        int damageNegation = isMastered(instance, owner) ? 1000 : 500;
+        int damageNegation = isMastered(instance, owner) ? CONFIG.elementalDamageNegationCapMastered : CONFIG.elementalDamageNegationCapUnmastered;
         if (TensuraDamageHelper.isTensuraMagic(source) || TensuraDamageHelper.isNaturalEffects(source)) {
             if (instance.isToggled()) {
                 if (damageDifference >= damageNegation) {
@@ -401,14 +403,14 @@ Temporarily affects all beneficial effects and negative status effects.*/
                 player.removeAllEffects();
                 player.invulnerableTime = 60;
 
-                player.setHealth(((float) ((maxHP * 0.1) + 1)));
-                if (maxSHP <= (existence.getSpiritualHealth() * 0.1)) {
-                    existence.setSpiritualHealth((maxSHP * 0.1) + 1);
+                player.setHealth(((float) ((maxHP * CONFIG.deathBypassHealthReturn) + 1)));
+                if (maxSHP <= (existence.getSpiritualHealth() * CONFIG.deathBypassSpiritualHealthReturnThresh)) {
+                    existence.setSpiritualHealth((maxSHP * CONFIG.deathBypassSpiritualHealthReturn) + 1);
                 }
 
                 applyEffects(owner);
 
-                instance.setCoolDown(600, 1);
+                instance.setCoolDown(CONFIG.deathBypassCooldown, 1);
                 return false;
             } else {
                 return true;
@@ -420,7 +422,7 @@ Temporarily affects all beneficial effects and negative status effects.*/
 
     private void applyEffects(LivingEntity owner) {
         if (owner instanceof Player player) {
-            MobEffectInstance resistance = new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 1200, 2, false, false, false);
+            MobEffectInstance resistance = new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, CONFIG.deathBypassResistanceDuration, CONFIG.deathBypassResistanceAmplifier, false, false, false);
             player.addEffect(resistance);
         }
     }
@@ -429,7 +431,7 @@ Temporarily affects all beneficial effects and negative status effects.*/
     public void onPressed(ManasSkillInstance instance, LivingEntity entity, int keyNumber, int mode) {
        //[Active - Press] Flaring Form: Increase the duration of beneficial effects by 60s and cure negative status effects.
         // Consume 2500 MP/ Minute and 1000 MP/ Level cured. 30s (15s Mastered) CD.
-        int cooldown = isMastered(instance, entity) ? 15 : 30;
+        int cooldown = isMastered(instance, entity) ? CONFIG.flaringFormCooldownMastered : CONFIG.flaringFormCooldownUnmastered;
         if (mode == 0) {
             if (entity instanceof Player player) {
                 IExistence existence = TensuraStorages.getExistenceFrom(player);
@@ -437,7 +439,7 @@ Temporarily affects all beneficial effects and negative status effects.*/
                 int totalDurationExtended = 0;
                 for (MobEffectInstance effect : player.getActiveEffects()) {
                     if (effect.getEffect().value().getCategory() == MobEffectCategory.BENEFICIAL) {
-                        int newDuration = effect.getDuration() + 1200; // +60s
+                        int newDuration = effect.getDuration() + CONFIG.flaringFormBuffDurationBonus; // +60s
                         MobEffectInstance extended = new MobEffectInstance(effect.getEffect(), newDuration, effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon());
                         player.addEffect(extended);
                         totalDurationExtended += 1;
@@ -448,8 +450,8 @@ Temporarily affects all beneficial effects and negative status effects.*/
                         effectsRemoved += levels;
                     }
                 }
-                double extensionCost = 2500;
-                double removalCost = 1000;
+                double extensionCost = CONFIG.flaringFormBuffMPCostPerDurationBonus;
+                double removalCost = CONFIG.flaringFormDebuffMPCostPerLevel;
                 double mpRemovalCost = (effectsRemoved * removalCost);
                 double mpExtensionCost = (totalDurationExtended * extensionCost);
                 double currentMP = existence.getMagicule();
@@ -464,5 +466,6 @@ Temporarily affects all beneficial effects and negative status effects.*/
 
     static {
         REMNANTS_OF_ASCENSION = ResourceLocation.fromNamespaceAndPath("trstarlight", "remnants_of_ascension");
+        CONFIG = ConfigRegistry.getConfig(aspectSeriesSkillConfig.class).RemnantsOfAscension;
     }
 }

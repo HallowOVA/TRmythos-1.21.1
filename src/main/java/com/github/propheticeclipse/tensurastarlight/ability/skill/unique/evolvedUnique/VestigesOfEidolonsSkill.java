@@ -1,10 +1,12 @@
 package com.github.propheticeclipse.tensurastarlight.ability.skill.unique.evolvedUnique;
 
+import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
 import com.github.propheticeclipse.tensurastarlight.registry.skills.StarlightUniqueSkills;
 import com.github.propheticeclipse.tensurastarlight.utils.ConeProjection;
 import com.github.propheticeclipse.tensurastarlight.utils.StarlightUtils;
 import dev.shadowsoffire.apothic_attributes.api.ALObjects;
 import dev.shadowsoffire.placebo.color.GradientColor;
+import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.network.api.util.Changeable;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.manascore.skill.api.SkillAPI;
@@ -48,6 +50,7 @@ import java.util.List;
 public class VestigesOfEidolonsSkill extends Skill {
 
     public static final ResourceLocation VESTIGES_OF_EIDOLONS;
+    private static final aspectSeriesSkillConfig.VestigesOfEidolons CONFIG;
     public VestigesOfEidolonsSkill() {
         super(SkillType.UNIQUE);
     }
@@ -112,8 +115,8 @@ public class VestigesOfEidolonsSkill extends Skill {
         if (magicule != null && !magicule.hasModifier(VESTIGES_OF_EIDOLONS)) {
             magicule.addOrReplacePermanentModifier(new AttributeModifier(VESTIGES_OF_EIDOLONS, manaPercent, AttributeModifier.Operation.ADD_VALUE));
         }
-        double critRateMod = 0.1;
-        double critDamMod = 0.15;
+        double critRateMod = CONFIG.strikeCritRate;
+        double critDamMod = CONFIG.strikeCritDamage;
         AttributeInstance critRate = owner.getAttribute(ALObjects.Attributes.CRIT_CHANCE);
         if (critRate != null && !critRate.hasModifier(VESTIGES_OF_EIDOLONS)) {
             critRate.addOrReplacePermanentModifier(new AttributeModifier(VESTIGES_OF_EIDOLONS, critRateMod, AttributeModifier.Operation.ADD_VALUE));
@@ -210,8 +213,8 @@ public class VestigesOfEidolonsSkill extends Skill {
         if (magicule != null && !magicule.hasModifier(VESTIGES_OF_EIDOLONS)) {
             magicule.addOrReplacePermanentModifier(new AttributeModifier(VESTIGES_OF_EIDOLONS, manaPercent, AttributeModifier.Operation.ADD_VALUE));
         }
-        double critRateMod = 0.1;
-        double critDamMod = 0.15;
+        double critRateMod = CONFIG.strikeCritRate;
+        double critDamMod = CONFIG.strikeCritDamage;
         AttributeInstance critRate = entity.getAttribute(ALObjects.Attributes.CRIT_CHANCE);
         if (critRate != null && !critRate.hasModifier(VESTIGES_OF_EIDOLONS)) {
             critRate.addOrReplacePermanentModifier(new AttributeModifier(VESTIGES_OF_EIDOLONS, critRateMod, AttributeModifier.Operation.ADD_VALUE));
@@ -257,12 +260,12 @@ public class VestigesOfEidolonsSkill extends Skill {
 
     @Override
     public double getAcquiringMagiculeCost(ManasSkillInstance instance) {
-        return 150000;
+        return CONFIG.magiculeAcquirementCost;
     }
 
     @Override
     public int getAcquirementMastery(LivingEntity entity) {
-        return 1;
+        return CONFIG.acquirementMastery;
     }
 
     @Override
@@ -273,8 +276,8 @@ public class VestigesOfEidolonsSkill extends Skill {
     public double getMagiculeCost(LivingEntity entity, ManasSkillInstance instance, int mode) {
         double cost;
         switch (mode) {
-            case 0 -> cost = 8000.0;
-            case 1 -> cost = 12000.0;
+            case 0 -> cost = CONFIG.solarEchoMPCost;
+            case 1 -> cost = CONFIG.judgementMPCost;
             default -> cost = 0.0;
         }
 
@@ -319,8 +322,8 @@ public class VestigesOfEidolonsSkill extends Skill {
         // Magicule Observation: See through all forms of lesser concealment, costless universal perception. (Toggle)
         IExistence existence = TensuraStorages.getExistenceFrom(entity);
 
-        float healthRegen = isMastered(instance, entity) ? 50 : 25; // Replace with Configured options later
-        float spiritHealthRegen = isMastered(instance, entity) ? 10 : 5;
+        float healthRegen = isMastered(instance, entity) ? CONFIG.immutableBeingHPRegenMastered : CONFIG.immutableBeingHPRegenUnmastered; // Replace with Configured options later
+        float spiritHealthRegen = isMastered(instance, entity) ? CONFIG.immutableBeingSHPRegenMastered : CONFIG.immutableBeingSHPRegenUnmastered;
         double maxSHP = entity.getAttributeValue(TensuraAttributes.MAX_SPIRITUAL_HEALTH);
         double curSHP = existence.getSpiritualHealth();
 
@@ -351,29 +354,29 @@ public class VestigesOfEidolonsSkill extends Skill {
         double maxMP = entity.getAttributeValue(TensuraAttributes.MAX_MAGICULE);
         double maxAP = entity.getAttributeValue(TensuraAttributes.MAX_AURA);
 
-        existence.setMagicule(existence.getMagicule() + maxMP * 0.0025);
-        existence.setAura(existence.getAura() + maxAP * 0.0025);
+        existence.setMagicule(existence.getMagicule() + maxMP * CONFIG.immutableBeingMPRegenPercent);
+        existence.setAura(existence.getAura() + maxAP * CONFIG.immutableBeingAPRegenPercent);
         existence.markDirty();
     }
 
     @Override
     public void onToggleOn(ManasSkillInstance instance, LivingEntity entity) {
-        AttributeHelper.addPresenceSense(entity, 3);
-        AttributeHelper.addPermanentAttributeIfHigher(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseHeatSourceSkill.HEAT_SENSE, (double)10.0F, AttributeModifier.Operation.ADD_VALUE);
-        AttributeHelper.addPermanentAttributeIfHigher(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseSoundwaveSkill.SOUND_SENSE, (double)10.0F, AttributeModifier.Operation.ADD_VALUE);
+        AttributeHelper.addPresenceSense(entity, CONFIG.presenceSenseLevel);
+        AttributeHelper.addPermanentAttributeIfHigher(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseHeatSourceSkill.HEAT_SENSE, CONFIG.heatSenseRadius, AttributeModifier.Operation.ADD_VALUE);
+        AttributeHelper.addPermanentAttributeIfHigher(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseSoundwaveSkill.SOUND_SENSE, CONFIG.soundSenseRadius, AttributeModifier.Operation.ADD_VALUE);
 
     }
 
     @Override
     public void onToggleOff(ManasSkillInstance instance, LivingEntity entity) {
-        AttributeHelper.removePresenceSense(entity, 3);
-        AttributeHelper.removeAttributeIfCorrect(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseHeatSourceSkill.HEAT_SENSE, (double)10.0F);
-        AttributeHelper.removeAttributeIfCorrect(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseSoundwaveSkill.SOUND_SENSE, (double)10.0F);
+        AttributeHelper.removePresenceSense(entity, CONFIG.presenceSenseLevel);
+        AttributeHelper.removeAttributeIfCorrect(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseHeatSourceSkill.HEAT_SENSE, CONFIG.heatSenseRadius);
+        AttributeHelper.removeAttributeIfCorrect(entity, TensuraAttributes.PRESENCE_SENSE_RADIUS, SenseSoundwaveSkill.SOUND_SENSE, CONFIG.soundSenseRadius);
     }
 
     @Override
     public boolean onDeath(ManasSkillInstance instance, LivingEntity owner, DamageSource source) {
-        int cooldown = isMastered(instance, owner) ? 800 : 1200;
+        int cooldown = isMastered(instance, owner) ? CONFIG.deathBypassCooldownMastered : CONFIG.deathBypassCooldownUnmastered;
         //Additionally, Bypass Death once per day (800s Mastered). When bypassing, recover to 10% of maximum HP and Teleport to your last spawn point.
         if (owner instanceof Player player) {
             double maxHP = player.getMaxHealth();
@@ -382,7 +385,7 @@ public class VestigesOfEidolonsSkill extends Skill {
                 player.removeAllEffects();
                 player.invulnerableTime = 60;
 
-                player.setHealth(((float) ((maxHP * 0.1) + 1)));
+                player.setHealth(((float) ((maxHP * CONFIG.deathBypassHealthReturn) + 1)));
 
                 StarlightUtils.TeleportToSpawnpoint(player);
 
@@ -400,23 +403,24 @@ public class VestigesOfEidolonsSkill extends Skill {
 
     @Override
     public boolean onDamageEntity(ManasSkillInstance instance, LivingEntity owner, LivingEntity target, DamageSource source, Changeable<Float> amount) {
-        double concealedMod = isMastered(instance, owner) ? 1.5 : 1.25;
-        double damageBonus = isMastered(instance, owner) ? 3.0 : 1.5; // Mastered : Unmastered
+        double concealedMod = isMastered(instance, owner) ? CONFIG.concealedTargetDamageModMastered : CONFIG.concealedTargetDamageModUnmastered;
+        double damageBonus = isMastered(instance, owner) ? CONFIG.lightDarkElementModMastered : CONFIG.lightDarkElementModUnmastered; // Mastered : Unmastered
         if (instance.isToggled()) {
             if (TensuraDamageHelper.isLightDamage(source) || TensuraDamageHelper.isDarkDamage(source)) {
 //                [Passive - Toggle] Lumen Optimization: 1.5x (3x) Light and Dark Damage.
 //                Stacking (Overwrites Light Remains if obtained again.)
 // Additionally, passively increase damage dealt to creatures with a concealment ability active by 1.5x.
-                if (target.getAttributeValue(TensuraAttributes.PRESENCE_CONCEALMENT) > 0) {
-                    Float initDamage = amount.get();
-                    if (initDamage != null) {
-                        amount.set((float) (initDamage * concealedMod));
-                    }
-                }
 
                 Float initDamage = amount.get();
                 if (initDamage != null) {
                     amount.set((float) (initDamage * damageBonus));
+                }
+            }
+
+            if (target.getAttributeValue(TensuraAttributes.PRESENCE_CONCEALMENT) > 0) {
+                Float initDamage = amount.get();
+                if (initDamage != null) {
+                    amount.set((float) (initDamage * concealedMod));
                 }
             }
         }
@@ -451,9 +455,9 @@ public class VestigesOfEidolonsSkill extends Skill {
 // Fragility for 5s upon hit to any non-allied creature. Doesn’t penetrate walls. 2s CD, 8000 MP. Gains mastery for each target hit.
         if (mode == 0) {
             Level level = entity.level();
-            double coneAngleDeg = 160; // 60 degrees cone
-            double range = 13.0;
-            float damage = this.isMastered(instance, entity) ? 100 : 50; // M:UM // 37.5% : 30%
+            double coneAngleDeg = CONFIG.solarEchoConeAngle; // 60 degrees cone
+            double range = CONFIG.solarEchoConeLength;
+            float damage = this.isMastered(instance, entity) ? CONFIG.solarEchoDamageMastered : CONFIG.solarEchoDamageUnmastered; // M:UM // 37.5% : 30%
 
             List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class,
                     entity.getBoundingBox().inflate(range),
@@ -474,11 +478,9 @@ public class VestigesOfEidolonsSkill extends Skill {
 
                     level.playSound((Player) null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.CAMPFIRE_CRACKLE, SoundSource.PLAYERS, 1.5F, 0.3F);
                     // Replace Sound
-                    int amplifier = 1; // 0 = Level 1 Effect
-                    int duration = 100; // Mastered : Unmastered Duration is in Ticks (100 = ~5s
-                    MobEffectInstance darkness = new MobEffectInstance(MobEffects.DARKNESS, duration, amplifier, false, false, false);
-                    MobEffectInstance fragility = new MobEffectInstance(TensuraMobEffects.FRAGILITY, duration, amplifier, false, false, false);
-                    MobEffectInstance silence = new MobEffectInstance(TensuraMobEffects.SILENCE, duration, 0, false, false, false);
+                    MobEffectInstance darkness = new MobEffectInstance(MobEffects.DARKNESS, CONFIG.solarEchoDarknessDuration, CONFIG.solarEchoDarknessAmplifier, false, false, false);
+                    MobEffectInstance fragility = new MobEffectInstance(TensuraMobEffects.FRAGILITY, CONFIG.solarEchoFragilityDuration, CONFIG.solarEchoFragilityAmplifier, false, false, false);
+                    MobEffectInstance silence = new MobEffectInstance(TensuraMobEffects.SILENCE, CONFIG.solarEchoSilenceDuration, CONFIG.solarEchoSilenceAmplifier, false, false, false);
 
                     TensuraMobEffect.addEffect(target, darkness, entity, this, mode);
                     TensuraMobEffect.addEffect(target, fragility, entity, this, mode);
@@ -488,17 +490,17 @@ public class VestigesOfEidolonsSkill extends Skill {
             }
             this.addMasteryPoint(instance, entity, targetHitCount);
             this.addMasteryPoint(instance, entity);
-            instance.setCoolDown(2, 0);
+            instance.setCoolDown(CONFIG.solarEchoCooldown, 0);
         }
         if (mode == 1) {
             //[Active - Charge] Judgement of Past: Send out a wave of darkness in a 90° cone 15 blocks long, deal 100 (200 Mastered)
 // Darkness Damage and shortly after strike targets hit with a pillar of light from above dealing 500 (750 Mastered) Light Damage.
 // Doesn’t penetrate walls. 20s CD, 12000 MP. Gains 7 mastery.
             Level level = entity.level();
-            double coneAngleDeg = 90; // 60 degrees cone
-            double range = 16.0;
-            float damage = this.isMastered(instance, entity) ? 40 : 20; // M:UM // 37.5% : 30%
-            float damageAfter = this.isMastered(instance, entity) ? 200 : 80; // M:UM // 37.5% : 30%
+            double coneAngleDeg = CONFIG.judgementConeAngle; // 60 degrees cone
+            double range = CONFIG.judgementConeLength;
+            float damage = this.isMastered(instance, entity) ? CONFIG.judgementFirstDamageMastered : CONFIG.judgementFirstDamageUnmastered; // M:UM // 37.5% : 30%
+            float damageAfter = this.isMastered(instance, entity) ? CONFIG.judgementSecondDamageMastered : CONFIG.judgementSecondDamageUnmastered; // M:UM // 37.5% : 30%
 
             List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class,
                     entity.getBoundingBox().inflate(range),
@@ -518,11 +520,12 @@ public class VestigesOfEidolonsSkill extends Skill {
                 }
             }
             this.addMasteryPoint(instance, entity);
-            instance.setCoolDown(20, 1);
+            instance.setCoolDown(CONFIG.judgementCooldown, 1);
         }
     }
 
     static {
         VESTIGES_OF_EIDOLONS = ResourceLocation.fromNamespaceAndPath("trstarlight", "vestiges_of_eidolons");
+        CONFIG = ConfigRegistry.getConfig(aspectSeriesSkillConfig.class).VestigesOfEidolons;
     }
 }

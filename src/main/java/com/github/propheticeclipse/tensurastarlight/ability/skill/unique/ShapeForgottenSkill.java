@@ -1,7 +1,9 @@
 package com.github.propheticeclipse.tensurastarlight.ability.skill.unique;
 
+import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
 import com.github.propheticeclipse.tensurastarlight.registry.StarlightEffects;
 import com.github.propheticeclipse.tensurastarlight.registry.skills.StarlightUniqueSkills;
+import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.network.api.util.Changeable;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.tensura.ability.SkillUtils;
@@ -21,6 +23,7 @@ public class ShapeForgottenSkill extends Skill {
     public ShapeForgottenSkill() {
         super(SkillType.UNIQUE);
     }
+    private static final aspectSeriesSkillConfig.ShapeForgotten CONFIG;
 
 //    # Shape Forgotten
 //-# Unique
@@ -41,12 +44,12 @@ public class ShapeForgottenSkill extends Skill {
 
     @Override
     public int getAcquirementMastery(LivingEntity entity) {
-        return 1;
+        return CONFIG.acquirementMastery;
     }
 
     @Override
     public double getAcquiringMagiculeCost(ManasSkillInstance instance) {
-        return 75000;
+        return CONFIG.magiculeAcquirementCost;
     }
 
     @Override
@@ -91,19 +94,19 @@ public class ShapeForgottenSkill extends Skill {
         double originalDamageNum = amount.get();
         MobEffectInstance buff = owner.getEffect(TensuraMobEffects.getReference(StarlightEffects.SHAPE_FORGOTTEN_ARMOR));
 
-        if (originalDamageNum >= 10) {
+        if (originalDamageNum >= CONFIG.shiftingArmorDamageTrigger) {
             int i = 0;
-            int originalDuration = 100;
+            int originalDuration = CONFIG.shiftingArmorDurationFirstHit;
             int duration;
             if (buff != null) {
-                duration = buff.getDuration() + 50;
-                i = (duration - originalDuration) / (300);
+                duration = buff.getDuration() + CONFIG.shiftingArmorDurationConsecutiveHit;
+                i = (duration - originalDuration) / (CONFIG.shiftingArmorAmpliDurationScaling);
                 addMasteryPoint(instance, owner);
             } else {
                 duration = originalDuration;
             }
-            if (i > 9) {
-                i = 9;
+            if (i > CONFIG.armorBuffMaxAmplifier) {
+                i = CONFIG.armorBuffMaxAmplifier;
             }
 
             if (EnergyHelper.isOutOfEnergy(owner, instance, 1, i)) {
@@ -117,10 +120,10 @@ public class ShapeForgottenSkill extends Skill {
         if (instance.isToggled() && buff != null) {
 
             int i = (buff.getAmplifier() + 1);
-            double damageModifier = isMastered(instance, owner) ? 4 : 2;
-            double lowHPDamageModifier = isMastered(instance, owner) ? 5 : 3;
+            double damageModifier = isMastered(instance, owner) ? CONFIG.damageNegationMastered : CONFIG.damageNegationUnmastered;
+            double lowHPDamageModifier = isMastered(instance, owner) ? CONFIG.damageNegationLowHPMastered : CONFIG.damageNegationLowHPUnmastered;
             double totalReduction = 0;
-            if (owner.getHealth() <= (owner.getMaxHealth() * 0.4)) {
+            if (owner.getHealth() <= (owner.getMaxHealth() * CONFIG.damageNegationLowHPThresh)) {
                 totalReduction = lowHPDamageModifier * i;
             } else {
                 totalReduction = damageModifier * i;
@@ -144,21 +147,25 @@ public class ShapeForgottenSkill extends Skill {
                 IExistence existence = TensuraStorages.getExistenceFrom(player);
                 int effectsRemoved = 0;
                 for (MobEffectInstance effect : player.getActiveEffects()) {
-                    if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+                    if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) { // Setup whitelist and blacklist config.
                         int levels = (effect.getAmplifier() + 1);
                         player.removeEffect(effect.getEffect());
                         addMasteryPoint(instance, player);
                         effectsRemoved += levels;
                     }
                 }
-                double removalCost = 750;
+                double removalCost = CONFIG.shiftingFormMPCost;
                 double mpCost = (effectsRemoved * removalCost);
                 double currentMP = existence.getMagicule();
 
                 existence.setMagicule(currentMP - mpCost);
-                instance.setCoolDown(30, 0);
+                instance.setCoolDown(CONFIG.shiftingFormCooldown, 0);
             }
 
         }
+    }
+
+    static {
+        CONFIG = ConfigRegistry.getConfig(aspectSeriesSkillConfig.class).ShapeForgotten;
     }
 }

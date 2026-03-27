@@ -204,7 +204,7 @@ public class EchoEnduresSkill extends Skill {
                 }
             }
             this.addMasteryPoint(instance, entity);
-            instance.setCoolDown(3, 0);
+            instance.setCoolDown(CONFIG.soundBurstCooldown, 0);
         }
     }
 

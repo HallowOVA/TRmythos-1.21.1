@@ -1,7 +1,9 @@
 package com.github.propheticeclipse.tensurastarlight.ability.skill.unique;
 
+import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
 import com.github.propheticeclipse.tensurastarlight.registry.StarlightEffects;
 import com.github.propheticeclipse.tensurastarlight.registry.skills.StarlightUniqueSkills;
+import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.network.api.util.Changeable;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.tensura.ability.SkillUtils;
@@ -26,6 +28,8 @@ public class EmberRemainsSkill extends Skill {
         super(SkillType.UNIQUE);
     }
 
+    private static final aspectSeriesSkillConfig.EmberRemains CONFIG;
+
 //    # Ember Remains
 //-# Unique
 //-# “Concentrate your will upon smothering, for only unresisting flame may never die.”
@@ -45,19 +49,19 @@ public class EmberRemainsSkill extends Skill {
             defyFateCount = 0;
         }
 
-        boolean deniedFate = defyFateCount >= 3;
+        boolean deniedFate = defyFateCount >= CONFIG.defyFateCount;
         boolean hasLightRemains = (SkillUtils.hasSkill(entity, StarlightUniqueSkills.LIGHT_REMAINS.get()) || SkillUtils.hasSkill(entity, StarlightUniqueSkills.VESTIGES_OF_EIDOLONS.get()));
         return hasLightRemains && deniedFate;
     }
 
     @Override
     public int getAcquirementMastery(LivingEntity entity) {
-        return 1;
+        return CONFIG.acquirementMastery;
     }
 
     @Override
     public double getAcquiringMagiculeCost(ManasSkillInstance instance) {
-        return super.getAcquiringMagiculeCost(instance);
+        return CONFIG.magiculeAcquirementCost;
     }
 
     @Override
@@ -86,11 +90,11 @@ public class EmberRemainsSkill extends Skill {
                 player.removeAllEffects();
                 player.invulnerableTime = 60;
 
-                player.setHealth(((float) ((maxHP * 0.1) + 1)));
+                player.setHealth(((float) ((maxHP * CONFIG.deathBypassHealthReturn) + 1)));
 
                 applyEffects(owner);
 
-                instance.setCoolDown(600, 1);
+                instance.setCoolDown(CONFIG.deathBypassCooldown, 1);
                 return false;
             } else {
                 return true;
@@ -102,8 +106,8 @@ public class EmberRemainsSkill extends Skill {
 
     private void applyEffects(LivingEntity owner) {
         if (owner instanceof Player player) {
-            MobEffectInstance strengthen = new MobEffectInstance(TensuraMobEffects.getReference(TensuraMobEffects.STRENGTHEN), 1200, 1, false, false, false);
-            MobEffectInstance resistance = new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 1200, 1, false, false, false);
+            MobEffectInstance strengthen = new MobEffectInstance(TensuraMobEffects.getReference(TensuraMobEffects.STRENGTHEN), CONFIG.deathBypassStrengthenDuration, CONFIG.deathBypassStrengthenAmplifier, false, false, false);
+            MobEffectInstance resistance = new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, CONFIG.deathBypassResistanceDuration, CONFIG.deathBypassResistanceAmplifier, false, false, false);
             TensuraMobEffect.addEffect(owner, strengthen, owner, this, 1);
             player.addEffect(resistance);
         }
@@ -117,13 +121,16 @@ public class EmberRemainsSkill extends Skill {
     public boolean onDamageEntity(ManasSkillInstance instance, LivingEntity owner, LivingEntity target, DamageSource source, Changeable<Float> amount) {
         MobEffectInstance emberBuff = owner.getEffect(TensuraMobEffects.getReference(StarlightEffects.EMBER_ATTACK_IMPROVEMENT));
         int i = 0;
-        int originalDuration = 100;
+        int originalDuration = CONFIG.combatFlowDurationFirstHit;
         int duration;
         if (emberBuff != null) {
-            duration = emberBuff.getDuration() + 50;
-            i = (duration - originalDuration) / (200);
+            duration = emberBuff.getDuration() + CONFIG.combatFlowDurationConsecutiveHit;
+            i = (duration - originalDuration) / (CONFIG.combatFlowAmpliDurationScaling);
         } else {
             duration = originalDuration;
+        }
+        if (i > CONFIG.combatFlowMaxAmplifier) {
+            i = CONFIG.combatFlowMaxAmplifier;
         }
 
         owner.addEffect(new MobEffectInstance((TensuraMobEffects.getReference(StarlightEffects.EMBER_ATTACK_IMPROVEMENT)), duration, i, false, false, false));
@@ -139,23 +146,27 @@ public class EmberRemainsSkill extends Skill {
             if (entity instanceof Player player) {
                 IExistence existence = TensuraStorages.getExistenceFrom(player);
                 int totalDurationExtended = 0;
-                for (MobEffectInstance effect : player.getActiveEffects()) {
+                for (MobEffectInstance effect : player.getActiveEffects()) { // Setup Whitelist/Blacklist Config
                     if (effect.getEffect().value().getCategory() == MobEffectCategory.BENEFICIAL) {
-                        int newDuration = effect.getDuration() + 1200; // +60s
+                        int newDuration = effect.getDuration() + CONFIG.kindleFlamesDurationIncrease; // +60s
                         MobEffectInstance extended = new MobEffectInstance(effect.getEffect(), newDuration, effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon());
                         player.addEffect(extended);
                         addMasteryPoint(instance, player);
                         totalDurationExtended += 1;
                     }
                 }
-                double extensionCost = 2000;
+                double extensionCost = CONFIG.kindleFlamesManaCost;
                 double mpCost = (totalDurationExtended * extensionCost);
                 double currentMP = existence.getMagicule();
 
                 existence.setMagicule(currentMP - mpCost);
-                instance.setCoolDown(30, 0);
+                instance.setCoolDown(CONFIG.kindleFlamesCooldown, 0);
             }
 
         }
+    }
+
+    static {
+        CONFIG = ConfigRegistry.getConfig(aspectSeriesSkillConfig.class).EmberRemains;
     }
 }

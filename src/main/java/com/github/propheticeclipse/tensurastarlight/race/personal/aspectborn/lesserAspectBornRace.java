@@ -1,27 +1,19 @@
 package com.github.propheticeclipse.tensurastarlight.race.personal.aspectborn;
 
+import com.github.propheticeclipse.tensurastarlight.config.StarlightCommon;
 import com.github.propheticeclipse.tensurastarlight.config.races.aspectBornRaceConfig;
-import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
 import com.github.propheticeclipse.tensurastarlight.race.StarlightRace;
 import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.race.api.ManasRace;
 import io.github.manasmods.manascore.race.api.ManasRaceInstance;
 import io.github.manasmods.manascore.skill.api.ManasSkill;
 import io.github.manasmods.manascore.skill.api.SkillAPI;
-import io.github.manasmods.tensura.ability.TensuraSkill;
-import io.github.manasmods.tensura.config.ReincarnationConfig;
 import io.github.manasmods.tensura.config.race.RaceConfig;
-import io.github.manasmods.tensura.race.template.DefaultRace;
 import io.github.manasmods.tensura.registry.race.TensuraRaces;
-import io.github.manasmods.tensura.registry.skill.CommonSkills;
-import io.github.manasmods.tensura.registry.skill.IntrinsicSkills;
-import io.github.manasmods.tensura.registry.skill.ResistanceSkills;
-import io.github.manasmods.tensura.registry.skill.UniqueSkills;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,6 +28,10 @@ public class lesserAspectBornRace extends StarlightRace {
     }
 
     public RaceConfig.Default getDefaultConfig() {
+        return (ConfigRegistry.getConfig(aspectBornRaceConfig.class)).lesserAspectBorn;
+    }
+    
+    public StarlightCommon.RaceDefault getAttributeDefaultConfig() {
         return (ConfigRegistry.getConfig(aspectBornRaceConfig.class)).lesserAspectBorn;
     }
 

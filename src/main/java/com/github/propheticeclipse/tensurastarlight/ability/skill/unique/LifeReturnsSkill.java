@@ -1,7 +1,9 @@
 package com.github.propheticeclipse.tensurastarlight.ability.skill.unique;
 
+import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
 import com.github.propheticeclipse.tensurastarlight.registry.skills.StarlightUniqueSkills;
 import com.github.propheticeclipse.tensurastarlight.utils.StarlightUtils;
+import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.tensura.ability.SkillUtils;
 import io.github.manasmods.tensura.ability.skill.Skill;
@@ -13,6 +15,7 @@ import io.github.manasmods.tensura.util.EnergyHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -25,6 +28,7 @@ public class LifeReturnsSkill extends Skill {
     public LifeReturnsSkill() {
         super(SkillType.UNIQUE);
     }
+    private static final aspectSeriesSkillConfig.LifeReturns CONFIG;
 
     // Acquisition Conditions:
     //Have Light Remains (Mastered)
@@ -46,19 +50,19 @@ public class LifeReturnsSkill extends Skill {
             deathCount = 0;
         }
         boolean magiculePoisoningEffect = entity.hasEffect(TensuraMobEffects.MAGICULE_POISON);
-        boolean overEPTrigger = newEP >= (2 * 100000); // When adding configs replace with magicule cost
-        boolean deathComparison = (deathCount >= 10);
+        boolean overEPTrigger = newEP >= (CONFIG.overCostAcquirementMod * CONFIG.magiculeAcquirementCost); // When adding configs replace with magicule cost
+        boolean deathComparison = (deathCount >= CONFIG.deathCount);
         return (magiculePoisoningEffect || overEPTrigger || deathComparison) && SkillUtils.isSkillMastered(entity, StarlightUniqueSkills.LIGHT_REMAINS.get());
     }
 
     @Override
     public double getAcquiringMagiculeCost(ManasSkillInstance instance) {
-        return 75000;
+        return CONFIG.magiculeAcquirementCost;
     }
 
     @Override
     public int getAcquirementMastery(LivingEntity entity) {
-        return 1;
+        return CONFIG.acquirementMastery;
     }
 
     @Override
@@ -72,15 +76,15 @@ public class LifeReturnsSkill extends Skill {
     }
 
     public double getMagiculeCost(LivingEntity entity, ManasSkillInstance instance, int mode) {
-        return instance.isMastered(entity) ? 50 : 100;
+        return instance.isMastered(entity) ? CONFIG.regenMPCostMastered : CONFIG.regenMPCostUnmastered;
     }
 
     @Override
     public void onTick(ManasSkillInstance instance, LivingEntity entity) {
         IExistence existence = TensuraStorages.getExistenceFrom(entity);
 
-        float healthRegen = isMastered(instance, entity) ? 10 : 5; // Replace with Configured options later
-        float spiritHealthRegen = isMastered(instance, entity) ? 2 : 1;
+        float healthRegen = isMastered(instance, entity) ? CONFIG.regenHPAmountMastered : CONFIG.regenHPAmountUnmastered; // Replace with Configured options later
+        float spiritHealthRegen = isMastered(instance, entity) ? CONFIG.regenSHPAmountMastered : CONFIG.regenSHPAmountUnmastered;
         double maxSHP = entity.getAttributeValue(TensuraAttributes.MAX_SPIRITUAL_HEALTH);
         double curSHP = existence.getSpiritualHealth();
 
@@ -112,12 +116,12 @@ public class LifeReturnsSkill extends Skill {
                 player.removeAllEffects();
                 player.invulnerableTime = 60;
 
-                player.setHealth(((float) ((maxHP * 0.01) + 1)));
+                player.setHealth(((float) ((maxHP * CONFIG.deathBypassHealthReturn) + 1)));
 
                 StarlightUtils.TeleportToSpawnpoint(player);
 
                 player.level().playSound((Player) null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
-                instance.setCoolDown(1200, 0);
+                instance.setCoolDown(CONFIG.deathBypassCooldown, 0);
                 return false;
             } else {
                 return true;
@@ -126,5 +130,9 @@ public class LifeReturnsSkill extends Skill {
             return true;
         }
         // Returning true continues the event, returning false CANCELS the event.
+    }
+
+    static {
+        CONFIG = ConfigRegistry.getConfig(aspectSeriesSkillConfig.class).LifeReturns;
     }
 }

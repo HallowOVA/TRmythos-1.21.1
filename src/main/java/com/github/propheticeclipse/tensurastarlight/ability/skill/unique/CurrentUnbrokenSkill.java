@@ -1,6 +1,8 @@
 package com.github.propheticeclipse.tensurastarlight.ability.skill.unique;
 
+import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
 import com.github.propheticeclipse.tensurastarlight.registry.skills.StarlightUniqueSkills;
+import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.network.api.util.Changeable;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.tensura.ability.SkillUtils;
@@ -22,7 +24,7 @@ import net.minecraft.world.item.Items;
 
 public class CurrentUnbrokenSkill extends Skill {
     protected static final ResourceLocation CURRENT_UNBROKEN;
-
+    private static final aspectSeriesSkillConfig.CurrentUnbroken CONFIG;
     public CurrentUnbrokenSkill() {
         super(Skill.SkillType.UNIQUE);
     }
@@ -51,16 +53,16 @@ Passives
         } else {
             netherStar = 0;
         }
-        return netherStar >= 1 && emberRemains;
+        return netherStar >= CONFIG.netherStars && emberRemains;
     }
 
     @Override
     public double getAcquiringMagiculeCost(ManasSkillInstance instance) {
-        return 75000;
+        return CONFIG.magiculeAcquirementCost;
     }
 
     public int getAcquirementMastery(LivingEntity entity) {
-        return 1;
+        return CONFIG.acquirementMastery;
     }
 
     public boolean canBeToggled(ManasSkillInstance instance, LivingEntity entity) {
@@ -75,7 +77,7 @@ Passives
         //Additionally, improve Magic damage by 1.25x (Stacking).
         float originalDamageNum = amount.get();
         if (TensuraDamageHelper.isTensuraMagic(source)) {
-            double damageModifier = 1.25;
+            double damageModifier = CONFIG.tensuraMagicDamageModifier;
             amount.set((float) (originalDamageNum * damageModifier));
         }
 
@@ -87,10 +89,10 @@ Passives
         // [Passive - Toggle] Resist 20% of magical damage, up to 100 (500 Mastered) points of damage.
         // Damage resisted/negated through this directed into Barrier Points.
         float originalDamageNum = amount.get();
-        double damageModifier = 0.8;
+        double damageModifier = CONFIG.magicDamageResistance;
         double reducedDamageTotal = (originalDamageNum * damageModifier);
         double damageDifference = (originalDamageNum - reducedDamageTotal);
-        int damageNegation = isMastered(instance, owner) ? 500 : 100;
+        int damageNegation = isMastered(instance, owner) ? CONFIG.magicDamageResistCapMastered : CONFIG.magicDamageResistCapUnmastered;
         if (TensuraDamageHelper.isTensuraMagic(source)) {
             if (instance.isToggled()) {
                 if (damageDifference >= damageNegation) {
@@ -129,7 +131,7 @@ Passives
 
     private void ManaRegen(LivingEntity entity, ManasSkillInstance instance) {
         IExistence existence = TensuraStorages.getExistenceFrom(entity);
-        double manaGain = isMastered(instance, entity) ? 50 : 25;
+        double manaGain = isMastered(instance, entity) ? CONFIG.masteredMPRegen : CONFIG.unmasteredMPRegen;
 
         if (existence.getMagicule() + manaGain <= entity.getAttributeValue(TensuraAttributes.MAX_MAGICULE)) {
             existence.setMagicule(existence.getMagicule() + manaGain);
@@ -139,5 +141,6 @@ Passives
 
     static {
         CURRENT_UNBROKEN = ResourceLocation.fromNamespaceAndPath("trstarlight", "current_unbroken");
+        CONFIG = ConfigRegistry.getConfig(aspectSeriesSkillConfig.class).CurrentUnbroken;
     }
 }
