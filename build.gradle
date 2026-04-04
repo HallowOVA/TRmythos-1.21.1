@@ -149,7 +149,6 @@ dependencies {
     localRuntime "curse.maven:placebo-283644:6926281"
     localRuntime "curse.maven:ApothicAttributes-898963:6751650"
     localRuntime "curse.maven:architectury-api-419699:5786327"
-    localRuntime "curse.maven:saucelib-1453853:7817011"
     localRuntime "curse.maven:lodestone-616457:7264731"
 
     localRuntime fileTree(dir: 'libs', include: '*.jar')
