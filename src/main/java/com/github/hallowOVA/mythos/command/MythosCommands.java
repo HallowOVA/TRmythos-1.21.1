@@ -1,0 +1,913 @@
+package com.github.hallowOVA.mythos.command;
+
+import com.github.manasmods.manascore.api.skills.ManasSkillInstance;
+import com.github.manasmods.manascore.api.skills.SkillAPI;
+import com.github.manasmods.tensura.ability.SkillUtils;
+import com.github.manasmods.tensura.ability.skill.Skill;
+import com.github.manasmods.tensura.capability.race.TensuraPlayerCapability;
+import com.github.mythos.mythos.config.MythosSkillsConfig;
+import com.github.mythos.mythos.handler.ContagionHandler;
+import com.github.mythos.mythos.handler.GodClassHandler;
+import com.github.mythos.mythos.networking.MythosNetwork;
+import com.github.mythos.mythos.networking.play2server.ShaderPacket;
+import com.github.mythos.mythos.registry.skill.Skills;
+import com.github.mythos.mythos.voiceoftheworld.TrialManager;
+import com.github.mythos.mythos.voiceoftheworld.VoiceOfTheWorld;
+import com.github.mythos.mythos.voiceoftheworld.WorldTrial;
+import com.github.mythos.mythos.voiceoftheworld.WorldTrialRegistry;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.*;
+import io.github.Memoires.trmysticism.registry.effects.MysticismMobEffects;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+
+public class MythosCommands {
+
+    private static final ResourceLocation SPATIAL_DOMINATION =
+            new ResourceLocation("tensura", "spatial_domination");
+
+    private static final ResourceLocation SPATIAL_MOTION =
+            new ResourceLocation("tensura", "spatial_motion");
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("mythos")
+                                .requires(source -> source.hasPermission(4))
+
+                // Godclass
+                .then(Commands.literal("godclass")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("reset")
+                                .then(Commands.literal("all").executes(context -> {
+                                    GodClassHandler.get(context.getSource().getLevel()).resetAllOwners();
+                                    context.getSource().sendSuccess(Component.literal("§c[Mythos] All God statuses have been wiped."), true);
+                                    VoiceOfTheWorld.broadcast(context.getSource().getServer(),
+                                            "Notice. All Divine Authorities have been withdrawn. The seats of the Gods are now vacant.");
+                                    return 1;
+                                }))
+                                .then(Commands.literal("dendrahh").executes(context -> {
+                                    GodClassHandler.get(context.getSource().getLevel()).setDendrahhObtained(false);
+                                    context.getSource().sendSuccess(Component.literal("§e[Mythos] Dendrahh status reset."), true);
+                                    return 1;
+                                }))
+                                .then(Commands.literal("khonsu").executes(context -> {
+                                    GodClassHandler.get(context.getSource().getLevel()).setKhonsuObtained(false);
+                                    context.getSource().sendSuccess(Component.literal("§e[Mythos] Khonsu status reset."), true);
+                                    return 1;
+                                }))
+                                .then(Commands.literal("kthanid").executes(context -> {
+                                    GodClassHandler.get(context.getSource().getLevel()).setKthanidObtained(false);
+                                    context.getSource().sendSuccess(Component.literal("§e[Mythos] Kthanid status reset."), true);
+                                    return 1;
+                                }))
+                        )
+                        .then(Commands.literal("status").executes(context -> {
+                            GodClassHandler handler = GodClassHandler.get(context.getSource().getLevel());
+                            String status = String.format("§7Dendrahh: %b | Khonsu: %b | Kthanid: %b",
+                                    handler.isDendrahhObtained(), handler.isKhonsuObtained(), handler.isKthanidObtained());
+                            context.getSource().sendSuccess(Component.literal(status), false);
+                            return 1;
+                        }))
+                )
+
+                // Bibliomania
+                .then(Commands.literal("bibliomania")
+                        .then(Commands.literal("get").executes(context -> {
+                            if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+                                context.getSource().sendFailure(Component.literal("This command must be run by a player."));
+                                return 0;
+                            }
+
+                            Optional<ManasSkillInstance> skillOpt = SkillAPI.getSkillsFrom(player).getSkill(Skills.BIBLIOMANIA.get());
+
+                            if (skillOpt.isPresent()) {
+                                CompoundTag tag = skillOpt.get().getOrCreateTag();
+                                float rp = tag.getFloat("recordPoints");
+                                context.getSource().sendSuccess(Component.literal("§d[Bibliomania] §fYour current Record Points: §b" + rp), false);
+                            } else {
+                                context.getSource().sendFailure(Component.literal("§cError: You do not possess the Bibliomania skill."));
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("set")
+                                .requires(source -> source.hasPermission(4))
+                                .then(Commands.argument("target", EntityArgument.player())
+                                        .then(Commands.argument("amount", FloatArgumentType.floatArg(0, 1000))
+                                                .executes(context -> {
+                                                    ServerPlayer targetPlayer = EntityArgument.getPlayer(context, "target");
+                                                    float amount = FloatArgumentType.getFloat(context, "amount");
+                                                    Optional<ManasSkillInstance> skillOpt = SkillAPI.getSkillsFrom(targetPlayer).getSkill(Skills.BIBLIOMANIA.get());
+
+                                                    if (skillOpt.isPresent()) {
+                                                        ManasSkillInstance inst = skillOpt.get();
+                                                        CompoundTag tag = inst.getOrCreateTag();
+                                                        tag.putFloat("recordPoints", amount);
+                                                        inst.markDirty();
+                                                        context.getSource().sendSuccess(Component.literal("§d[Bibliomania] §fSet Record Points for " + targetPlayer.getScoreboardName() + " to §b" + amount), true);
+                                                    } else {
+                                                        context.getSource().sendFailure(Component.literal("§cError: Target does not have the Bibliomania skill."));
+                                                    }
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                        )
+                )
+
+
+                // World Trials
+                .then(Commands.literal("trials")
+                        .then(Commands.literal("get").executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+
+                            VoiceOfTheWorld.delayedAnnouncement(player,
+                                    "Inquiry received.",
+                                    "Scanning internal soul progress...",
+                                    "Current Trials: " + WorldTrialRegistry.getActiveTrialStatus(player)
+                            );
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("list").executes(context -> {
+                            if (WorldTrialRegistry.TRIALS.isEmpty()) {
+                                context.getSource().sendSuccess(Component.literal("§c[Mythos] No trials currently registered."), false);
+                                return 0;
+                            }
+
+                            context.getSource().sendSuccess(Component.literal("§b--- Global Trial Registry ---"), false);
+                            WorldTrialRegistry.TRIALS.forEach((id, trial) ->
+                                    context.getSource().sendSuccess(Component.literal("§7- §f" + id + " §8(§d" + trial.getName() + "§8)"), false));
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("pause")
+                                .requires(source -> source.hasPermission(4))
+                                .then(Commands.argument("state", BoolArgumentType.bool())
+                                        .executes(context -> {
+                                            boolean state = BoolArgumentType.getBool(context, "state");
+                                            TrialManager.setPaused(state);
+                                            String msg = state ? "§cPAUSED" : "§aRESUMED";
+                                            context.getSource().sendSuccess(Component.literal("§6[Mythos] §fWorld Trials are now " + msg), true);
+                                            return 1;
+                                        })))
+                        .then(Commands.literal("simulate")
+                                .requires(source -> source.hasPermission(4))
+                                .then(Commands.argument("target", EntityArgument.player())
+                                        .then(Commands.argument("trialId", StringArgumentType.word())
+                                                .executes(context -> {
+                                                    ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                                    String trialId = StringArgumentType.getString(context, "trialId");
+                                                    WorldTrial trial = WorldTrialRegistry.TRIALS.get(trialId);
+
+                                                    if (trial != null) {
+                                                        trial.checkProgress(target, trial.getRequirement());
+                                                        context.getSource().sendSuccess(Component.literal("§a[Mythos] Simulated completion of " + trialId + " for " + target.getScoreboardName()), true);
+                                                    } else {
+                                                        context.getSource().sendFailure(Component.literal("§cError: Trial not found."));
+                                                    }
+                                                    return 1;
+                                                }))))
+
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("clear")
+                                .then(Commands.argument("target", EntityArgument.player())
+                                        .executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            TrialManager.clearActiveTrial(target);
+                                            context.getSource().sendSuccess(Component.literal("§a[Mythos] Cleared active trials for " + target.getScoreboardName()), true);
+                                            return 1;
+                                        })
+                                )
+                        )
+                        .then(Commands.literal("reset_all")
+                                .requires(source -> source.hasPermission(4))
+                                .then(Commands.argument("target", EntityArgument.player()).executes(context -> {
+                                    ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                    CompoundTag tag = target.getPersistentData().getCompound(ServerPlayer.PERSISTED_NBT_TAG);
+
+                                    tag.getAllKeys().stream()
+                                            .filter(key -> key.startsWith("Trial_"))
+                                            .toList()
+                                            .forEach(tag::remove);
+
+                                    TrialManager.clearActiveTrial(target);
+                                    context.getSource().sendSuccess(Component.literal("§a[Mythos] All trial data purged for " + target.getScoreboardName()), true);
+                                    return 1;
+                                })))
+                        // Set
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("target", EntityArgument.player())
+                                        .then(Commands.argument("trialId", StringArgumentType.word())
+                                                .executes(context -> {
+                                                    ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                                    String trialId = StringArgumentType.getString(context, "trialId");
+
+                                                    if (!WorldTrialRegistry.TRIALS.containsKey(trialId)) {
+                                                        context.getSource().sendFailure(Component.literal("§cError: Trial ID '" + trialId + "' not found in registry."));
+                                                        return 0;
+                                                    }
+
+                                                    TrialManager.clearActiveTrial(target);
+                                                    TrialManager.initiateTrial(target, trialId);
+
+                                                    context.getSource().sendSuccess(Component.literal("§a[Mythos] Forced trial '" + trialId + "' onto " + target.getScoreboardName()), true);
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                        )
+                )
+
+
+                // Config
+                .then(Commands.literal("config")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("status").executes(context -> {
+                            StringBuilder sb = new StringBuilder("§6--- Mythos Config Status ---\n");
+                            sb.append("§7Vampire Ancestor: ").append(MythosSkillsConfig.VampireAncestor.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Dead Apostle: ").append(MythosSkillsConfig.DeadApostleAncestor.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Ultimate Obtainment: ").append(MythosSkillsConfig.EnableUltimateSkillObtainment.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7End of Evil: ").append(MythosSkillsConfig.endOfEvilReset.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Apophis Embodiment: ").append(MythosSkillsConfig.ApophisEmbodiment.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Announce Ultimates: ").append(GodClassHandler.get(context.getSource().getLevel()).isAnnouncementsEnabled() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Voice of the World: ").append(MythosSkillsConfig.voice_of_the_world.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Enable God Class Ultimates: ").append(MythosSkillsConfig.EnableGodClassUltimates.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Enable Skill Auras: ").append(MythosSkillsConfig.EnableSkillAuras.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Dark Desire: ").append(MythosSkillsConfig.DarkDesire.get() ? "§aON" : "§cOFF").append("\n");
+                            sb.append("§7Allow Ultimate Copying: ").append(MythosSkillsConfig.ALLOW_ULTIMATE_COPYING.get() ? "§aON" : "§cOFF");
+                            context.getSource().sendSuccess(Component.literal(sb.toString()), false);
+                            return 1;
+                        }))
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("DarkDesire")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.DarkDesire.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fDark Desire: " + val), true);
+                                    return 1;
+                                })))
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("EnableSkillAuras")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.EnableSkillAuras.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fEnable Skill Auras: " + val), true);
+                                    return 1;
+                                })))
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("allow_ultimate_copying")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.ALLOW_ULTIMATE_COPYING.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fAllow Ultimate Copying: " + val), true);
+                                    return 1;
+                                })))
+                        // God Class
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("EnableGodClassUltimates")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.EnableGodClassUltimates.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fEnable God Class Skills: " + val), true);
+                                    return 1;
+                                })))
+                        // Voice of the World
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("voice_of_the_world")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.voice_of_the_world.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fVoice of the World set to: " + val), true);
+                                    return 1;
+                                })))
+                        // Vampire Ancestor
+                        .then(Commands.literal("vampire_ancestor")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.VampireAncestor.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fVampireAncestor set to: " + val), true);
+                                    return 1;
+                                })))
+                        // Dead Apostle Ancestor
+                        .then(Commands.literal("dead_apostle_ancestor")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.DeadApostleAncestor.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fDeadApostleAncestor set to: " + val), true);
+                                    return 1;
+                                })))
+                        // Vampire Carnage
+                        .then(Commands.literal("vampire_carnage")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.VampireCarnage.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fVampireCarnage set to: " + val), true);
+                                    return 1;
+                                })))
+                        // End of Evil Reset
+                        .then(Commands.literal("end_of_evil_reset")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.endOfEvilReset.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fendOfEvilReset set to: " + val), true);
+                                    return 1;
+                                })))
+                        // Apophis Embodiment
+                        .then(Commands.literal("apophis_embodiment")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.ApophisEmbodiment.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fApophisEmbodiment set to: " + val), true);
+                                    return 1;
+                                })))
+                        // Enable Ultimate Skill Obtainment
+                        .then(Commands.literal("enable_ultimate_skills")
+                                .then(Commands.argument("value", BoolArgumentType.bool()).executes(context -> {
+                                    boolean val = BoolArgumentType.getBool(context, "value");
+                                    MythosSkillsConfig.EnableUltimateSkillObtainment.set(val);
+                                    context.getSource().sendSuccess(Component.literal("§6[Mythos Config] §fEnableUltimateSkillObtainment set to: " + val), true);
+                                    return 1;
+                                })))
+
+                        .then(Commands.literal("announce_ultimates")
+                                .requires(source -> source.hasPermission(4))
+                                .then(Commands.literal("on").executes(context -> {
+                                    GodClassHandler.get(context.getSource().getLevel()).setAnnouncementsEnabled(true);
+                                    context.getSource().sendSuccess(Component.literal("§a[Mythos] Announce Ultimate Skills is now enabled."), true);
+                                    return 1;
+                                }))
+                                .then(Commands.literal("off").executes(context -> {
+                                    GodClassHandler.get(context.getSource().getLevel()).setAnnouncementsEnabled(false);
+                                    context.getSource().sendSuccess(Component.literal("§c[Mythos] Announce Ultimate Skills is now disabled."), true);
+                                    return 1;
+                                }))
+                        )
+                )
+
+
+                .then(Commands.literal("inspect")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("target", EntityArgument.player()).executes(context -> {
+                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                            CompoundTag tag = target.getPersistentData().getCompound(ServerPlayer.PERSISTED_NBT_TAG);
+
+                            context.getSource().sendSuccess(Component.literal("§b--- Inspecting " + target.getScoreboardName() + " ---"), false);
+                            context.getSource().sendSuccess(Component.literal("§7Active Trial: §f" + TrialManager.getActiveTrialID(target)), false);
+                            context.getSource().sendSuccess(Component.literal("§7First Login: §f" + tag.getBoolean("Mythos_FirstLoginHandled")), false);
+                            return 1;
+                        }))
+                )
+
+                .then(Commands.literal("ep")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("target", EntityArgument.player())
+                                .then(Commands.literal("get")
+                                        .executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double mp = TensuraPlayerCapability.getBaseMagicule(target);
+                                            double ap = TensuraPlayerCapability.getBaseAura(target);
+                                            double total = mp + ap;
+
+                                            context.getSource().sendSuccess(Component.literal("§b--- EP Status: " + target.getScoreboardName() + " ---"), false);
+                                            context.getSource().sendSuccess(Component.literal("§7Magicules (MP): §b" + String.format("%.0f", mp)), false);
+                                            context.getSource().sendSuccess(Component.literal("§7Aura (AP): §e" + String.format("%.0f", ap)), false);
+                                            context.getSource().sendSuccess(Component.literal("§7Total EP: §a" + String.format("%.0f", total)), false);
+                                            return 1;
+                                        }))
+
+                                .then(Commands.literal("set")
+                                        .then(Commands.literal("mp").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double amount = DoubleArgumentType.getDouble(context, "amount");
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> cap.setBaseMagicule(amount, target));
+                                            context.getSource().sendSuccess(Component.literal("§b[EP] §fSet Magicules for " + target.getScoreboardName() + " to " + amount), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        })))
+                                        .then(Commands.literal("ap").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double amount = DoubleArgumentType.getDouble(context, "amount");
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> cap.setBaseAura(amount, target));
+                                            context.getSource().sendSuccess(Component.literal("§e[EP] §fSet Aura for " + target.getScoreboardName() + " to " + amount), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        })))
+                                        .then(Commands.literal("total").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double amount = DoubleArgumentType.getDouble(context, "amount");
+                                            double split = amount / 2.0;
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> {
+                                                cap.setBaseMagicule(split, target);
+                                                cap.setBaseAura(split, target);
+                                            });
+                                            context.getSource().sendSuccess(Component.literal("§a[EP] §fSet Total EP for " + target.getScoreboardName() + " to " + amount + " (50/50 split)"), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        })))
+                                )
+
+                                .then(Commands.literal("add")
+                                        .then(Commands.literal("mp").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double amount = DoubleArgumentType.getDouble(context, "amount");
+                                            TensuraPlayerCapability.setMagicule(target, TensuraPlayerCapability.getBaseMagicule(target) + amount);
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> cap.setBaseMagicule(amount + TensuraPlayerCapability.getBaseMagicule(target), target));
+                                            context.getSource().sendSuccess(Component.literal("§b[EP] §fAdded " + amount + " Magicules to " + target.getScoreboardName()), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        })))
+                                        .then(Commands.literal("ap").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double amount = DoubleArgumentType.getDouble(context, "amount");
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> cap.setBaseAura(amount + TensuraPlayerCapability.getBaseAura(target), target));
+                                            context.getSource().sendSuccess(Component.literal("§e[EP] §fAdded " + amount + " Aura to " + target.getScoreboardName()), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        })))
+                                        .then(Commands.literal("total").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double amount = DoubleArgumentType.getDouble(context, "amount");
+                                            double split = amount / 2.0;
+                                            TensuraPlayerCapability.setMagicule(target, TensuraPlayerCapability.getBaseMagicule(target) + split);
+                                            TensuraPlayerCapability.setAura(target, TensuraPlayerCapability.getBaseAura(target) + split);
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> {
+                                                cap.setBaseAura(split + TensuraPlayerCapability.getBaseAura(target), target);
+                                                cap.setBaseMagicule(split + TensuraPlayerCapability.getBaseMagicule(target), target);
+                                            });
+                                            context.getSource().sendSuccess(Component.literal("§a[EP] §fAdded " + amount + " Total EP to " + target.getScoreboardName()), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        })))
+                                )
+
+                                .then(Commands.literal("remove")
+                                        .then(Commands.literal("mp").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double result = Math.max(0, TensuraPlayerCapability.getBaseMagicule(target) - DoubleArgumentType.getDouble(context, "amount"));
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> cap.setBaseMagicule(result, target));
+                                            context.getSource().sendSuccess(Component.literal("§c[EP] §fReduced MP for " + target.getScoreboardName()), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        })))
+                                        .then(Commands.literal("ap").then(Commands.argument("amount", DoubleArgumentType.doubleArg(0)).executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+                                            double result = Math.max(0, TensuraPlayerCapability.getBaseAura(target) - DoubleArgumentType.getDouble(context, "amount"));
+                                            TensuraPlayerCapability.getFrom(target).ifPresent((cap) -> cap.setBaseAura(result, target));
+                                            context.getSource().sendSuccess(Component.literal("§c[EP] §fReduced AP for " + target.getScoreboardName()), true);
+                                            TensuraPlayerCapability.sync(target);
+                                            return 1;
+                                        }))))))
+
+                .then(Commands.literal("soulscan")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("target", EntityArgument.player()).executes(context -> {
+                            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+
+                            String raceName = Objects.requireNonNull(Objects.requireNonNull(TensuraPlayerCapability.getRace(target)).getRegistryName()).toString();
+                            double mag = TensuraPlayerCapability.getBaseMagicule(target);
+                            double aura = TensuraPlayerCapability.getBaseAura(target);
+                            boolean isSeed = TensuraPlayerCapability.isDemonLordSeed(target);
+                            boolean isEgg = TensuraPlayerCapability.isHeroEgg(target);
+                            boolean isDemon = TensuraPlayerCapability.isTrueDemonLord(target);
+                            boolean isHero = TensuraPlayerCapability.isTrueHero(target);
+
+                            StringBuilder uniqueSkills = new StringBuilder();
+                            StringBuilder ultimateSkills = new StringBuilder();
+
+                            SkillAPI.getSkillsFrom(target).getLearnedSkills().forEach(instance -> {
+                                Skill skill = (Skill) instance.getSkill();
+                                String displayName = Objects.requireNonNull(skill.getColoredName()).getString();
+
+                                if (skill.getType() == Skill.SkillType.ULTIMATE) {
+                                    ultimateSkills.append("§6[").append(displayName).append("] ");
+                                } else if (skill.getType() == Skill.SkillType.UNIQUE) {
+                                    uniqueSkills.append("§d[").append(displayName).append("] ");
+                                }
+                            });
+
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("§b--- Soul Signature: §f").append(target.getScoreboardName()).append(" §b---\n");
+                            sb.append("§7Race: §d").append(raceName).append("\n");
+                            sb.append("§7EP: §b").append(String.format("%.0f", mag)).append(" Magicules §f/ §e").append(String.format("%.0f", aura)).append(" Aura\n");
+
+                            sb.append("§7Potential: ");
+                            if (isSeed) sb.append("§4[Demon Lord Seed] ");
+                            if (isEgg) sb.append("§6[Hero's Egg] ");
+                            if (isDemon) sb.append("§4[True Demon Lord] ");
+                            if (isHero) sb.append("§6[True Hero] ");
+                            if (!isSeed && !isEgg && !isHero && !isDemon) sb.append("§8None");
+                            sb.append("\n");
+
+                            sb.append("§7Ultimates: ").append(!ultimateSkills.isEmpty() ? ultimateSkills : "§8None").append("\n");
+                            sb.append("§7Uniques: ").append(!uniqueSkills.isEmpty() ? uniqueSkills : "§8None");
+
+                            context.getSource().sendSuccess(Component.literal(sb.toString()), false);
+                            return 1;
+                        })))
+
+                .then(Commands.literal("announce")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("priority", StringArgumentType.word())
+                                .suggests((ctx, builder) -> {
+                                    builder.suggest("WORLD").suggest("ACQUISITION").suggest("PROGRESS");
+                                    return builder.buildFuture();
+                                })
+                                .then(Commands.argument("message", StringArgumentType.greedyString())
+                                        .executes(context -> {
+                                            String priorityStr = StringArgumentType.getString(context, "priority");
+                                            String message = StringArgumentType.getString(context, "message");
+                                            VoiceOfTheWorld.Priority priority = VoiceOfTheWorld.Priority.valueOf(priorityStr.toUpperCase());
+
+                                            context.getSource().getServer().getPlayerList().getPlayers().forEach(player ->
+                                                    VoiceOfTheWorld.delayedAnnouncement(player, priority, message)
+                                            );
+
+                                            return 1;
+                                        }))))
+
+                .then(Commands.literal("dimension_stats")
+                        .requires(source -> source.hasPermission(4))
+                        .executes(context -> {
+                            var players = context.getSource().getServer().getPlayerList().getPlayers();
+                            Map<String, Integer> counts = new HashMap<>();
+
+                            for (ServerPlayer p : players) {
+                                String dim = p.level.dimension().location().toString();
+                                counts.put(dim, counts.getOrDefault(dim, 0) + 1);
+                            }
+
+                            StringBuilder sb = new StringBuilder("§b--- Dimension Population ---\n");
+                            counts.forEach((dim, count) -> sb.append("§7").append(dim).append(": §f").append(count).append("\n"));
+                            context.getSource().sendSuccess(Component.literal(sb.toString()), false);
+                            return 1;
+                        }))
+
+                .requires(source -> source.hasPermission(4))
+                .then(Commands.literal("world")
+                        .then(Commands.literal("scream").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§4[ CRITICAL ERROR ]", "§cSoul-Space partition dissolved.", "§4Entering the Void.");
+
+                                player.playNotifySound(SoundEvents.ENDER_DRAGON_DEATH, SoundSource.MASTER, 1.2f, 0.1f);
+                                player.playNotifySound(SoundEvents.GHAST_SCREAM, SoundSource.MASTER, 0.8f, 0.5f);
+                                player.playNotifySound(SoundEvents.WITHER_SPAWN, SoundSource.MASTER, 1.0f, 0.2f);
+
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/master_sky.json", 0.7f, 0.0f, 0.0f), player);
+                                VoiceOfTheWorld.screenShake(player, 60, 5);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("tectonic").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§6[ GEOLOGICAL ANOMALY ]", "§fTectonic plates shifting...", "§7Massive gravity fluctuations detected.");
+
+                                player.playNotifySound(SoundEvents.GENERIC_EXPLODE, SoundSource.MASTER, 0.5f, 0.5f);
+                                player.playNotifySound(SoundEvents.WARDEN_DIG, SoundSource.MASTER, 1.5f, 0.8f);
+                                player.playNotifySound(SoundEvents.DEEPSLATE_BREAK, SoundSource.MASTER, 1.2f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/tectonic.json", 0.4f, 0.3f, 0.2f), player);
+
+                                VoiceOfTheWorld.screenShake(player, 100, 8);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("eclipse").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§5[ CELESTIAL ALIGNMENT ]", "§8The Sun is being consumed.", "§dMagicule density reaching critical levels.");
+
+                                player.playNotifySound(SoundEvents.BEACON_DEACTIVATE, SoundSource.MASTER, 1.2f, 0.1f);
+                                player.playNotifySound(SoundEvents.ENDER_EYE_DEATH, SoundSource.MASTER, 1.0f, 0.5f);
+                                player.playNotifySound(SoundEvents.ENDERMAN_STARE, SoundSource.MASTER, 0.4f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/eclipse.json", 0.1f, 0.0f, 0.2f), player);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("stasis").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§b[ CHRONO FRACTURE ]", "§fTime-flow synchronization failed.", "§3Freezing causality...");
+
+                                player.playNotifySound(SoundEvents.BELL_RESONATE, SoundSource.MASTER, 1.0f, 2.0f);
+                                player.playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.MASTER, 1.5f, 0.1f);
+                                player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.MASTER, 0.8f, 0.5f);
+
+                                player.addEffect(new MobEffectInstance(MysticismMobEffects.TIMESTOP.get(), 200, 20, false, false, false));
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/stasis.json", 0.5f, 0.5f, 0.5f), player);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("starfall").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§9[ STARFALL CONVERGENCE ]", "§bCelestial bodies aligned.", "§fDrawing power from the Outer Cosmos.");
+
+                                player.playNotifySound(SoundEvents.AMETHYST_BLOCK_PLACE, SoundSource.MASTER, 1.0f, 0.5f);
+                                player.playNotifySound(SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.MASTER, 0.7f, 1.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/twinkle.json", 1.0f, 1.0f, 1.0f), player);
+                                VoiceOfTheWorld.screenShake(player, 100, 1);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("glitch").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§a[ LOGIC FAILURE ]", "§7Illegal memory access in §fReality.jar", "§2Re-routing packets to Void...");
+
+                                player.playNotifySound(SoundEvents.ITEM_BREAK, SoundSource.MASTER, 1.0f, 0.1f);
+                                player.playNotifySound(SoundEvents.ENDERMAN_TELEPORT, SoundSource.MASTER, 0.8f, 2.0f);
+                                player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1.2f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/glitch.json", 1.0f, 1.0f, 1.0f), player);
+
+                                VoiceOfTheWorld.screenShake(player, 40, 10);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("carnage").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§4[ BLOOD MOON RISING ]", "§cBiological inhibitors: §lOFF", "§fThe hunger of the Ancestors is manifested.");
+
+                                player.playNotifySound(SoundEvents.PHANTOM_BITE, SoundSource.MASTER, 1.5f, 0.5f);
+                                player.playNotifySound(SoundEvents.RAVAGER_ROAR, SoundSource.MASTER, 0.7f, 0.2f);
+                                player.playNotifySound(SoundEvents.CONDUIT_ATTACK_TARGET, SoundSource.MASTER, 1.0f, 0.1f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/carnage.json", 0.8f, 0.0f, 0.0f), player);
+
+                                VoiceOfTheWorld.screenShake(player, 120, 3);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("judgment").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§e[ DIVINE INTERVENTION ]", "§fUniversal laws are being rewritten.", "§6Behold the weight of Authority.");
+
+                                player.playNotifySound(SoundEvents.TOTEM_USE, SoundSource.MASTER, 0.6f, 0.5f);
+                                player.playNotifySound(SoundEvents.BEACON_ACTIVATE, SoundSource.MASTER, 1.2f, 1.0f);
+                                player.playNotifySound(SoundEvents.EVOKER_PREPARE_WOLOLO, SoundSource.MASTER, 1.0f, 0.1f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/judgement.json", 1.0f, 0.9f, 0.4f), player);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("chaos").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§d[ SPIRITUAL OVERFLOW ]", "§fMagicule pressure: §lCRITICAL", "§5Reality boundaries are blurring.");
+
+                                player.playNotifySound(SoundEvents.PORTAL_TRAVEL, SoundSource.MASTER, 0.4f, 2.0f);
+                                player.playNotifySound(SoundEvents.WITCH_CELEBRATE, SoundSource.MASTER, 0.6f, 0.1f);
+                                player.playNotifySound(SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.MASTER, 1.0f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/chaos.json", 0.7f, 0.0f, 1.0f), player);
+
+                                VoiceOfTheWorld.screenShake(player, 80, 12);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("overgrowth").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§2[ NATURE'S WRATH ]", "§aBiological synchronization: 100%", "§fThe world is being reclaimed.");
+
+                                player.playNotifySound(SoundEvents.BEE_LOOP_AGGRESSIVE, SoundSource.MASTER, 0.4f, 0.1f);
+                                player.playNotifySound(SoundEvents.GRASS_STEP, SoundSource.MASTER, 2.0f, 0.1f);
+                                player.playNotifySound(SoundEvents.AZALEA_LEAVES_PLACE, SoundSource.MASTER, 1.0f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/overgrowth.json", 0.1f, 0.9f, 0.1f), player);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("primordial").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§6[ PRIMORDIAL AWAKENING ]", "§fSoul signature detected: §4Ancient Class", "§eSubmit to the presence of the Origin.");
+
+                                player.playNotifySound(SoundEvents.ENDER_DRAGON_GROWL, SoundSource.MASTER, 1.0f, 0.1f);
+                                player.playNotifySound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 0.5f, 0.1f);
+                                player.playNotifySound(SoundEvents.BELL_RESONATE, SoundSource.MASTER, 1.5f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/primordial.json", 1.0f, 0.4f, 0.0f), player);
+
+                                VoiceOfTheWorld.screenShake(player, 150, 4);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("void").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§0[ DIMENSIONAL COLLAPSE ]", "§7Warning. Sector data not found.", "§8Returning to the Great Void.");
+
+                                player.playNotifySound(SoundEvents.BEACON_DEACTIVATE, SoundSource.MASTER, 2.0f, 0.1f);
+                                player.playNotifySound(SoundEvents.ENDERMAN_DEATH, SoundSource.MASTER, 0.5f, 0.1f);
+                                player.playNotifySound(SoundEvents.CONDUIT_DEACTIVATE, SoundSource.MASTER, 1.0f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/void.json", 0.05f, 0.05f, 0.05f), player);
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("frostbite").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§b[ THERMAL COLLAPSE ]", "§fAbsolute zero approaching...", "§3Magicule vibration has ceased.");
+
+                                player.playNotifySound(SoundEvents.GLASS_BREAK, SoundSource.MASTER, 0.5f, 0.1f);
+                                player.playNotifySound(SoundEvents.WOLF_PANT, SoundSource.MASTER, 0.2f, 0.1f);
+                                player.playNotifySound(SoundEvents.PLAYER_HURT_FREEZE, SoundSource.MASTER, 1.0f, 0.5f);
+
+                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/frostbite.json", 0.0f, 0.7f, 1.0f), player);
+                            }
+                            return 1;
+                        }))
+
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.literal("restore").executes(context -> {
+                            for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD,
+                                        "§b[ SYSTEM RECOVERY ]", "§fRe-establishing soul-space partitions...", "§7Calibrating visual sensors.");
+
+                                new Thread(() -> {
+                                    try {
+                                        Thread.sleep(2000);
+
+                                        MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/master_sky.json", 0.2f, 0.2f, 0.2f), player);
+
+                                        player.playNotifySound(SoundEvents.BEACON_ACTIVATE, SoundSource.MASTER, 0.5f, 0.5f);
+
+                                        Thread.sleep(3000);
+
+                                        MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/master_sky.json", 0.5f, 0.5f, 0.6f), player);
+
+                                        Thread.sleep(3000);
+
+                                        MythosNetwork.sendToPlayer(new ShaderPacket("none", 1.0f, 1.0f, 1.0f), player);
+
+                                        player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.MASTER, 0.8f, 1.2f);
+
+                                        VoiceOfTheWorld.delayedAnnouncement(player, VoiceOfTheWorld.Priority.WORLD, "§aNotice.", "§fWorld stability restored.", "§7Soul core synchronized.");
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }).start();
+                            }
+                            return 1;
+                        }))
+
+                        .then(Commands.literal("shaders")
+                                .requires(source -> source.hasPermission(4))
+                                .then(Commands.literal("tint")
+                                        .then(Commands.argument("r", IntegerArgumentType.integer(0, 255))
+                                                .then(Commands.argument("g", IntegerArgumentType.integer(0, 255))
+                                                        .then(Commands.argument("b", IntegerArgumentType.integer(0, 255))
+                                                                .then(Commands.argument("targets", EntityArgument.players())
+                                                                        .executes(context -> {
+                                                                            float r = IntegerArgumentType.getInteger(context, "r") / 255.0f;
+                                                                            float g = IntegerArgumentType.getInteger(context, "g") / 255.0f;
+                                                                            float b = IntegerArgumentType.getInteger(context, "b") / 255.0f;
+
+                                                                            var players = EntityArgument.getPlayers(context, "targets");
+                                                                            for (ServerPlayer p : players) {
+                                                                                MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/master_sky.json", r, g, b), p);
+                                                                            }
+
+                                                                            return 1;
+                                                                        })))))
+
+                                        .then(Commands.literal("reset").executes(context -> {
+                                                    for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                                        MythosNetwork.sendToPlayer(new ShaderPacket("none", 1.0f, 1.0f, 1.0f), player);
+                                                    }
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                                .then(Commands.argument("r", IntegerArgumentType.integer(0, 255))
+                                        .then(Commands.argument("g", IntegerArgumentType.integer(0, 255))
+                                                .then(Commands.argument("b", IntegerArgumentType.integer(0, 255))
+                                                        .then(Commands.argument("targets", EntityArgument.players())
+                                                                .executes(context -> {
+
+                                                                    var players = EntityArgument.getPlayers(context, "targets");
+                                                                    for (ServerPlayer p : players) {
+                                                                        MythosNetwork.sendToPlayer(new ShaderPacket("trmythos:shaders/post/twinkle.json", 1.0f, 1.0f, 1.0f), p);
+                                                                    }
+
+                                                                    return 1;
+                                                                })))))
+                        )
+                )
+
+                .then(Commands.literal("contagion")
+                        .requires(source -> source.hasPermission(0))
+                        .then(Commands.literal("mutate")
+                                .then(Commands.argument("path", StringArgumentType.word())
+                                        .executes(context -> {
+                                            ServerPlayer player = context.getSource().getPlayerOrException();
+
+                                            boolean hasSkill = SkillUtils.hasSkill(player, Skills.CONTAGION.get());
+                                            if (!hasSkill && !context.getSource().hasPermission(2)) {
+                                                return 0;
+                                            }
+
+                                            String path = StringArgumentType.getString(context, "path");
+                                            ContagionHandler.handleMutationLogic(player, path);
+                                            return 1;
+                                        })
+                                )
+                        )
+                )
+                );
+                dispatcher.register(Commands.literal("spacetp")
+                        .requires(source -> source.getEntity() instanceof ServerPlayer)
+
+                        .then(Commands.argument("location", Vec3Argument.vec3())
+                                .executes(context -> {
+
+                                    ServerPlayer player = context.getSource().getPlayerOrException();
+
+                                    var registry = SkillAPI.getSkillRegistry();
+
+                                    var domSkill = registry.getValue(SPATIAL_DOMINATION);
+                                    var motionSkill = registry.getValue(SPATIAL_MOTION);
+
+                                    if (domSkill == null || motionSkill == null) {
+                                        player.sendSystemMessage(Component.literal("§cSpatial skills not found."));
+                                        return 0;
+                                    }
+
+                                    var storage = SkillAPI.getSkillsFrom(player);
+
+                                    Optional<ManasSkillInstance> spatialDom = storage.getSkill(domSkill);
+                                    Optional<ManasSkillInstance> spatialMotion = storage.getSkill(motionSkill);
+
+                                    if (spatialDom.isEmpty() || spatialMotion.isEmpty()
+                                            || !spatialDom.get().isMastered(player)
+                                            || !spatialMotion.get().isMastered(player)) {
+
+                                        player.sendSystemMessage(Component.literal(
+                                                "§cYour spatial authority is insufficient."
+                                        ));
+                                        return 0;
+                                    }
+
+                                    Vec3 pos = Vec3Argument.getVec3(context, "location");
+
+                                    player.teleportTo(
+                                            player.getLevel(),
+                                            pos.x,
+                                            pos.y,
+                                            pos.z,
+                                            player.getYRot(),
+                                            player.getXRot()
+                                    );
+
+                                    player.playNotifySound(
+                                            SoundEvents.ENDERMAN_TELEPORT,
+                                            SoundSource.PLAYERS,
+                                            1.0F,
+                                            1.0F
+                                    );
+
+                                    return 1;
+                                })
+                        )
+                );
+
+    }
+}

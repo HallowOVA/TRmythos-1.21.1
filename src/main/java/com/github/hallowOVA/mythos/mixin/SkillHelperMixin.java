@@ -1,0 +1,41 @@
+package com.github.hallowOVA.mythos.mixin;
+
+import com.github.manasmods.manascore.api.skills.ManasSkill;
+import com.github.manasmods.tensura.ability.SkillHelper;
+import com.github.manasmods.tensura.ability.SkillUtils;
+import com.github.mythos.mythos.registry.skill.Skills;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+
+import static com.github.mythos.mythos.mixin.SkillUtilsMixin.hasSkill;
+
+@Mixin({SkillHelper.class})
+public abstract class SkillHelperMixin {
+    public SkillHelperMixin() {
+    }
+
+    @ModifyVariable(
+            method = {"outOfMagicule(Lnet/minecraft/world/entity/LivingEntity;D)Z"},
+            at = @At("HEAD"),
+            index = 1,
+            remap = false,
+            argsOnly = true
+    )
+    private static double mythosMagiculeCost(double cost, LivingEntity entity) {
+        if (entity instanceof Player player) {
+            if (SkillUtils.isSkillToggled(player, Skills.DOMINATE.get())) {
+                cost *= 0.5;
+            }
+            if (SkillUtils.isSkillToggled(player, Skills.DOMINATE.get())) {
+                cost *= 2;
+            }
+            if (hasSkill(player, Skills.SPIRALHEART.get())) {
+                cost *= 0.7;
+            }
+        }
+        return cost;
+    }
+}
