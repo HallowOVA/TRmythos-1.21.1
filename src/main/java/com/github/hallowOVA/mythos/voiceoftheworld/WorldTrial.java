@@ -1,7 +1,6 @@
 package com.github.hallowOVA.mythos.voiceoftheworld;
 
-import com.github.manasmods.tensura.capability.race.TensuraPlayerCapability;
-import com.github.mythos.mythos.config.MythosSkillsConfig;
+import com.github.hallowOVA.mythos.config.MythosSkillsConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;

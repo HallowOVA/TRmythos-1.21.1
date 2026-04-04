@@ -1,6 +1,6 @@
 package com.github.hallowOVA.mythos.renderers;
 
-import com.github.mythos.mythos.entity.projectile.VajraBreathProjectile;
+import com.github.hallowOVA.mythos.entity.projectile.VajraBreathProjectile;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;

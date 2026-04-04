@@ -1,5 +1,6 @@
 package com.github.hallowOVA.mythos.renderers;
 
+import com.github.hallowOVA.mythos.entity.BlackHoleEntity;
 import com.github.mythos.mythos.entity.BlackHoleEntity;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;

@@ -1,12 +1,11 @@
 package com.github.hallowOVA.mythos.util;
 
-import com.github.manasmods.manascore.api.skills.ManasSkill;
-import com.github.manasmods.manascore.api.skills.SkillAPI;
-import com.github.manasmods.tensura.ability.TensuraSkillInstance;
-import com.github.manasmods.tensura.capability.race.TensuraPlayerCapability;
-import com.github.manasmods.tensura.registry.race.TensuraRaces;
-import com.github.mythos.mythos.registry.skill.Skills;
-import com.github.mythos.mythos.voiceoftheworld.VoiceOfTheWorld;
+import com.github.hallowOVA.mythos.registry.skill.Skills;
+import com.github.hallowOVA.mythos.voiceoftheworld.VoiceOfTheWorld;
+import dev.architectury.event.events.common.TickEvent;
+import io.github.manasmods.tensura.ability.TensuraSkillInstance;
+import io.github.manasmods.tensura.ability.skill.Skill;
+import io.github.manasmods.tensura.registry.race.TensuraRaces;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -15,14 +14,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.Optional;
 import java.util.Random;
-@Mod.EventBusSubscriber(modid = "trmythos")
+@EventBusSubscriber(modid = "trmythos")
 public class MythosUtils {
 
     public MythosUtils() {
@@ -91,8 +90,9 @@ public class MythosUtils {
 //        });
 //    }
 
-    private static void grantStarterSkill(ServerPlayer player, ManasSkill skill, Component message) {
-        if (skill == null) return;
+    private static void grantStarterSkill(ServerPlayer player, Skill skill1, Component message) {
+        if (skill1 == null) return;
+        if (!(skill1 instanceof ManasSkill skill)) return;
         TensuraSkillInstance skillInstance = new TensuraSkillInstance(skill);
         skillInstance.getOrCreateTag().putBoolean("NoMagiculeCost", true);
 
@@ -148,10 +148,9 @@ public class MythosUtils {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
+    public static void onServerTick(ServerTickEvent.Post event) {
             VoiceOfTheWorld.tickQueue(event.getServer());
-        }
+
     }
 
 }

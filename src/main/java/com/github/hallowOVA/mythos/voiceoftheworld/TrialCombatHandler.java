@@ -1,6 +1,6 @@
 package com.github.hallowOVA.mythos.voiceoftheworld;
 
-import com.github.mythos.mythos.config.MythosSkillsConfig;
+import com.github.hallowOVA.mythos.config.MythosSkillsConfig;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.Villager;
@@ -9,11 +9,11 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
-@Mod.EventBusSubscriber(modid = "trmythos")
+@EventBusSubscriber(modid = "trmythos")
 public class TrialCombatHandler {
 
     @SubscribeEvent

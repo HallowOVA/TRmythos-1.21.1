@@ -143,9 +143,13 @@ dependencies {
 
     compileOnly "curse.maven:architectury-api-419699:5786327"
     compileOnly "curse.maven:lodestone-616457:7264731"
+    compileOnly "curse.maven:manascore-619025:7869424"
+    compileOnly "curse.maven:manascore-619025:7869418"
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     localRuntime "curse.maven:architectury-api-419699:5786327"
     localRuntime "curse.maven:lodestone-616457:7264731"
+    localRuntime "curse.maven:manascore-619025:7869424"
+    localRuntime "curse.maven:manascore-619025:7869418"
 
     localRuntime fileTree(dir: 'libs', include: '*.jar')
 }

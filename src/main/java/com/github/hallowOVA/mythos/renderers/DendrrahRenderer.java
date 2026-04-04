@@ -1,8 +1,8 @@
 package com.github.hallowOVA.mythos.renderers;
 
-import com.github.manasmods.tensura.entity.client.player.PlayerLikeModel;
-import com.github.manasmods.tensura.entity.client.player.PlayerLikeRenderer;
-import com.github.mythos.mythos.entity.boss.DendrrahEntity;
+import com.github.hallowOVA.mythos.entity.boss.DendrrahEntity;
+import io.github.manasmods.tensura.client.entity.human.PlayerLikeModel;
+import io.github.manasmods.tensura.client.entity.human.PlayerLikeRenderer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.HumanoidModel.ArmPose;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -12,13 +12,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 
 public class DendrrahRenderer extends PlayerLikeRenderer<DendrrahEntity> {
 
     public DendrrahRenderer(EntityRendererProvider.Context pContext, boolean slim) {
-        super(pContext, new PlayerLikeModel(pContext.bakeLayer(slim ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), slim), 0.5F);
+        super(pContext, new PlayerLikeModel<>(pContext.bakeLayer(slim ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), slim), 0.5F);
 
         this.addLayer(new HumanoidArmorLayer<>(this,
                 new HumanoidModel<>(pContext.bakeLayer(slim ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),

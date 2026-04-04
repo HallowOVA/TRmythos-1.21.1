@@ -1,14 +1,9 @@
 package com.github.hallowOVA.mythos.entity;
 
-import com.github.manasmods.tensura.ability.SkillUtils;
-import com.github.manasmods.tensura.util.damage.TensuraDamageSources;
-import com.github.mythos.mythos.registry.MythosEntityTypes;
-import io.github.Memoires.trmysticism.entity.projectile.skill.AntaeusBlueProjectile;
-import io.github.Memoires.trmysticism.entity.projectile.skill.AntaeusPurpleProjectile;
-import io.github.Memoires.trmysticism.entity.projectile.skill.AntaeusRedProjectile;
-import io.github.Memoires.trmysticism.registry.skill.UltimateSkills;
+import com.github.hallowOVA.mythos.registry.MythosEntityTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -24,7 +19,7 @@ import java.util.Map;
 
 public class BoreasBarrier extends Entity {
     private LivingEntity owner;
-    private final Map<Projectile, Integer> projectilesToDespawn;
+    private Map<Projectile, Integer> projectilesToDespawn;
 
     private static final double ISOLATION_RADIUS = 10.0;
 
@@ -35,14 +30,20 @@ public class BoreasBarrier extends Entity {
         this.setInvisible(true);
     }
 
-    public BoreasBarrier(Level level, LivingEntity owner) {
+    public BoreasBarrier(Level level, LivingEntity owner, Map<Projectile, Integer> projectilesToDespawn) {
         this(MythosEntityTypes.BOREAS_BARRIER.get(), level);
+        this.projectilesToDespawn = projectilesToDespawn;
         this.setPos(owner.getX(), owner.getY(), owner.getZ());
         this.owner = owner;
     }
 
     public LivingEntity getOwner() {
         return owner;
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+
     }
 
     @Override
@@ -74,11 +75,10 @@ public class BoreasBarrier extends Entity {
             if (distance < ISOLATION_RADIUS) {
                 applyBreachDamage(entity);
 
-                if (!SkillUtils.hasSkill(entity, UltimateSkills.SUSANOO.get())) {
-                    Vec3 pushDirection = entity.position().subtract(this.position()).normalize().scale(1.2);
-                    entity.setDeltaMovement(pushDirection);
-                    entity.hurtMarked = true;
-                }
+                Vec3 pushDirection = entity.position().subtract(this.position()).normalize().scale(1.2);
+                entity.setDeltaMovement(pushDirection);
+                entity.hurtMarked = true;
+
             }
         });
     }
@@ -106,12 +106,6 @@ public class BoreasBarrier extends Entity {
                 return true;
             }
         });
-    }
-
-    private boolean shouldAffectProjectile(Projectile projectile) {
-        return !(projectile instanceof AntaeusBlueProjectile) &&
-                !(projectile instanceof AntaeusPurpleProjectile) &&
-                !(projectile instanceof AntaeusRedProjectile);
     }
 
     private void stopProjectile(Projectile projectile) {

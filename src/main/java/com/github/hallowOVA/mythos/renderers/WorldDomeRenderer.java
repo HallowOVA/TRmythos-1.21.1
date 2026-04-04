@@ -1,8 +1,8 @@
 package com.github.hallowOVA.mythos.renderers;
 
-import com.github.mythos.mythos.registry.MythosRenderTypes;
-import com.github.mythos.mythos.registry.MythosShaders;
-import com.github.mythos.mythos.registry.MythosWorldVisuals;
+import com.github.hallowOVA.mythos.registry.MythosRenderTypes;
+import com.github.hallowOVA.mythos.registry.MythosShaders;
+import com.github.hallowOVA.mythos.registry.MythosWorldVisuals;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -10,12 +10,13 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.joml.Matrix4f;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
+@EventBusSubscriber(value = Dist.CLIENT)
 public class WorldDomeRenderer {
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
@@ -62,7 +63,6 @@ public class WorldDomeRenderer {
                 float x = (float) Math.cos(lng);
                 float y = (float) Math.sin(lng);
 
-                // Add vertices for a quad
                 consumer.vertex(mat, x * zr0, z0, y * zr0).color(1f, 1f, 1f, 1f).uv((float)j/segments, (float)i/segments).endVertex();
                 consumer.vertex(mat, x * zr1, z1, y * zr1).color(1f, 1f, 1f, 1f).uv((float)j/segments, (float)(i+1)/segments).endVertex();
             }
@@ -76,7 +76,7 @@ public class WorldDomeRenderer {
         return new Vec3(x, y, z);
     }
 
-    private static void put(VertexConsumer vc, com.mojang.math.Matrix4f mat, Vec3 p, float radius, float alpha, float u, float v, int light, float thunder01) {
+    private static void put(VertexConsumer vc, Matrix4f mat, Vec3 p, float radius, float alpha, float u, float v, int light, float thunder01) {
 
 
         float bottomness = Mth.clamp((-((float) p.y) / radius), 0f, 1f);

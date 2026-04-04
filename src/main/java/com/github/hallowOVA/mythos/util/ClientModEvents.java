@@ -1,17 +1,17 @@
 package com.github.hallowOVA.mythos.util;
 
-import com.github.mythos.mythos.client.screen.OrunScreen;
-import com.github.mythos.mythos.registry.MythosEntityTypes;
-import com.github.mythos.mythos.registry.menu.MythosMenuTypes;
-import com.github.mythos.mythos.renderers.*;
+import com.github.hallowOVA.mythos.client.screen.OrunScreen;
+import com.github.hallowOVA.mythos.registry.MythosEntityTypes;
+import com.github.hallowOVA.mythos.registry.menu.MythosMenuTypes;
+import com.github.hallowOVA.mythos.renderers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
-@Mod.EventBusSubscriber(modid = "trmythos", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = "trmythos", value = Dist.CLIENT)
 public class ClientModEvents {
     public ClientModEvents() {
     }

@@ -2,17 +2,17 @@ package com.github.hallowOVA.mythos.renderers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
-@Mod.EventBusSubscriber(modid = "trmythos", value = Dist.CLIENT)
+@EventBusSubscriber(modid = "trmythos", value = Dist.CLIENT)
 public class MythosSkyRenderer {
     private static final ResourceLocation SKY_IMAGE1 = new ResourceLocation("trmythos", "textures/sky/void_eye.png");
 

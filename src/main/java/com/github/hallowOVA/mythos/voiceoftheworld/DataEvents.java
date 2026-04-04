@@ -1,10 +1,11 @@
 package com.github.hallowOVA.mythos.voiceoftheworld;
 
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
-@Mod.EventBusSubscriber(modid = "trmythos", bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = "trmythos")
 public class DataEvents {
     @SubscribeEvent
     public static void onResourceReload(AddReloadListenerEvent event) {

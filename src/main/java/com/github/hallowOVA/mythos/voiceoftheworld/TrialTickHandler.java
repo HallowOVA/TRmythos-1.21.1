@@ -1,27 +1,27 @@
 package com.github.hallowOVA.mythos.voiceoftheworld;
 
-import com.github.manasmods.tensura.capability.race.TensuraPlayerCapability;
-import com.github.mythos.mythos.config.MythosSkillsConfig;
-import com.github.mythos.mythos.networking.MythosNetwork;
-import com.github.mythos.mythos.networking.play2server.ShaderPacket;
+
+import com.github.hallowOVA.mythos.config.MythosSkillsConfig;
+import com.github.hallowOVA.mythos.networking.MythosNetwork;
+import com.github.hallowOVA.mythos.networking.play2server.ShaderPacket;
+import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
-@Mod.EventBusSubscriber(modid = "trmythos")
+@EventBusSubscriber(modid = "trmythos")
 public class TrialTickHandler {
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!MythosSkillsConfig.voice_of_the_world.get()) return;
-        if (event.side.isServer() && event.phase == TickEvent.Phase.END) {
+        if (event.getEntity() instanceof ServerPlayer player) {
             if (TrialManager.isPaused()) return;
-            ServerPlayer player = (ServerPlayer) event.player;
             String activeID = TrialManager.getActiveTrialID(player);
             CompoundTag tag = player.getPersistentData();
 

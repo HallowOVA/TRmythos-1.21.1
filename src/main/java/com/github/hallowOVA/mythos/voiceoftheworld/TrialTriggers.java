@@ -1,14 +1,15 @@
 package com.github.hallowOVA.mythos.voiceoftheworld;
 
-import com.github.mythos.mythos.config.MythosSkillsConfig;
+import com.github.hallowOVA.mythos.config.MythosSkillsConfig;
+import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-@Mod.EventBusSubscriber(modid = "mythos")
+@EventBusSubscriber(modid = "mythos")
 public class TrialTriggers {
 
     @SubscribeEvent
@@ -28,10 +29,9 @@ public class TrialTriggers {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+    public static void onPlayerTick(PlayerTickEvent.Pre event) {
         if (!MythosSkillsConfig.voice_of_the_world.get()) return;
-        if (event.side.isServer() && event.phase == TickEvent.Phase.END) {
-            ServerPlayer player = (ServerPlayer) event.player;
+        if (event.getEntity() instanceof ServerPlayer player) {
 
             if (player.getY() <= -100000) {
                 if (WorldTrialRegistry.TRIALS.containsKey("void_walker")) {

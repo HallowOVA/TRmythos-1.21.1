@@ -1,9 +1,8 @@
 package com.github.hallowOVA.mythos.voiceoftheworld;
 
-import com.github.manasmods.tensura.capability.race.TensuraPlayerCapability;
-import com.github.mythos.mythos.config.MythosSkillsConfig;
-import com.github.mythos.mythos.networking.MythosNetwork;
-import com.github.mythos.mythos.networking.play2server.ScreenShakePacket;
+import com.github.hallowOVA.mythos.config.MythosSkillsConfig;
+import com.github.hallowOVA.mythos.networking.MythosNetwork;
+import com.github.hallowOVA.mythos.networking.play2server.ScreenShakePacket;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -16,7 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Objects;
 import java.util.PriorityQueue;
@@ -192,7 +191,7 @@ public class VoiceOfTheWorld {
         VoiceOfTheWorld.screenShake(player, 1.5f, 100);
         player.playNotifySound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 0.5f, 1.5f);
 
-        ServerLevel level = player.getLevel();
+        ServerLevel level = player.serverLevel();
         level.sendParticles(ParticleTypes.FLASH, player.getX(), player.getY() + 1, player.getZ(), 20, 0.5, 0.5, 0.5, 0.0);
     }
 
