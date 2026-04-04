@@ -42,13 +42,11 @@ displayName = "${mod_name}" #mandatory
 #credits="" #optional
 
 # The authors of the mod, displayed in the mod UI (optional)
-authors = "propheticeclipse"
+authors = "Hallowquin, Electro, Jester (Prophetic rose in contributing)"
 
 # The description text for the mod (multi line!) (#mandatory)
 description = '''
-A Tensura addon made for the Tensura: Starlight modpack.
-
-Thanks for downloading!
+Something
 '''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
@@ -82,7 +80,7 @@ ordering = "NONE"
 side = "BOTH"
 
 # Here's another dependency
-[[dependencies.trstarlight]]
+[[dependencies.trmythos]]
 modId = "minecraft"
 type = "required"
 # This version range declares a minimum of the current minecraft version up to but not including the next major version

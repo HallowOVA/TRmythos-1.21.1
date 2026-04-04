@@ -1,18 +1,18 @@
-package com.github.propheticeclipse.tensurastarlight.ability.skill.intrinsic;
+package com.github.hallowova.trmythos.ability.skill;
 
-import com.github.propheticeclipse.tensurastarlight.config.skills.aspectSeriesSkillConfig;
+import com.github.hallowova.trmythos.config.skills.aspectSeriesSkillConfig;
 import io.github.manasmods.manascore.config.ConfigRegistry;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.tensura.ability.skill.Skill;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
-public class luckySkill extends Skill {
+public class templateSkill extends Skill {
 
     private static final aspectSeriesSkillConfig.MemoryRecreation CONFIG;
     public static final ResourceLocation MEMORY_RECREATION;
 
-    public luckySkill() {
+    public templateSkill() {
         super(SkillType.UNIQUE);
     }
 
