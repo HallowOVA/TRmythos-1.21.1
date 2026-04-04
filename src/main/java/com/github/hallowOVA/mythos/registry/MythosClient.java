@@ -1,16 +1,16 @@
 package com.github.hallowOVA.mythos.registry;
 
-import com.github.mythos.mythos.client.screen.OrunScreen;
-import com.github.mythos.mythos.particles.RedRunesParticles;
-import com.github.mythos.mythos.registry.menu.MythosMenuTypes;
+import com.github.hallowOVA.mythos.client.screen.OrunScreen;
+import com.github.hallowOVA.mythos.particles.RedRunesParticles;
+import com.github.hallowOVA.mythos.registry.menu.MythosMenuTypes;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
-@Mod.EventBusSubscriber(modid = "trmythos", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = "trmythos", value = Dist.CLIENT)
 public class MythosClient {
 
     public static void clientSetup(final FMLClientSetupEvent event) {

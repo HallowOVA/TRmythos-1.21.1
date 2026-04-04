@@ -14,7 +14,7 @@ public class MythosRenderTypes extends RenderType {
 
     public static RenderType mythosDome(Supplier<ShaderInstance> shader) {
         return RenderType.create("mythos_dome",
-                DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.TRIANGLES, 256, false, true,
+                DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.TRIANGLES, 256, false, true,
                 CompositeState.builder()
                         .setShaderState(new ShaderStateShard(shader))
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)

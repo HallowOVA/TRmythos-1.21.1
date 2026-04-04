@@ -1,12 +1,10 @@
 package com.github.hallowOVA.mythos.registry;
 
-import com.github.manasmods.manascore.api.data.gen.annotation.GenerateItemModels;
-import com.github.mythos.mythos.item.*;
+import com.github.hallowOVA.mythos.item.*;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class MythosItems {
 
@@ -28,7 +26,7 @@ public class MythosItems {
     }
 
     static {
-        registry = DeferredRegister.create(ForgeRegistries.ITEMS, "trmythos");
+        registry = DeferredRegister.create(NeoForgeRegistries.ITEMS, "trmythos");
         DEMON_CORE = registry.register("demon_core", () -> new Item((new Item.Properties())));
         UNDECEMBER = registry.register("undecember", undecember::new);
         CATHARSIS = registry.register("catharsis", catharsis::new);

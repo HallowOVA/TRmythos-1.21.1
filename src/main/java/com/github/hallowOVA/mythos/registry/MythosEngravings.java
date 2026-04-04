@@ -1,16 +1,14 @@
 package com.github.hallowOVA.mythos.registry;
 
-import com.github.manasmods.tensura.enchantment.EngravingEnchantment;
-import com.github.mythos.mythos.engravings.VainOfTheWorld;
+import com.github.hallowOVA.mythos.engravings.VainOfTheWorld;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class MythosEngravings {
     private static final DeferredRegister<Enchantment> registry;
-    public static final RegistryObject<EngravingEnchantment> VAIN;
+    public static final RegistryObject<Enchantment> VAIN;
 
 
     public MythosEngravings() {
@@ -21,7 +19,7 @@ public class MythosEngravings {
     }
 
     static {
-        registry = DeferredRegister.create(ForgeRegistries.ENCHANTMENTS, "trmythos");
+        registry = DeferredRegister.create(NeoForgeRegistries.ENCHANTMENTS, "trmythos");
         VAIN = registry.register("vain_of_the_world", VainOfTheWorld::new);
     }
 }

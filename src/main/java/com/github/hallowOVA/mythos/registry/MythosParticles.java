@@ -2,10 +2,9 @@ package com.github.hallowOVA.mythos.registry;
 
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class MythosParticles {
     private static final DeferredRegister<ParticleType<?>> registry;
@@ -20,7 +19,7 @@ public class MythosParticles {
 
 
     static {
-        registry = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, "trmythos");
+        registry = DeferredRegister.create(NeoForgeRegistries.PARTICLE_TYPES, "trmythos");
 //        DRAGONFIRE = registry.register("dragonfire", () -> {
 //            return new SimpleParticleType(false);
 //        });

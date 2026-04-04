@@ -1,6 +1,5 @@
 package com.github.hallowOVA.mythos.registry;
 
-import com.github.hallowOVA.mythos.SlaveOfFate; // Ensure this matches your ModID class
 import com.github.hallowOVA.mythos.entity.BlackHoleEntity;
 import com.github.hallowOVA.mythos.entity.BoreasBarrier;
 import com.github.hallowOVA.mythos.entity.IntrovertBarrier;
