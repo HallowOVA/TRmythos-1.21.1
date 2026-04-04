@@ -141,13 +141,9 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-    compileOnly "curse.maven:placebo-283644:6926281"
-    compileOnly "curse.maven:ApothicAttributes-898963:6751650"
     compileOnly "curse.maven:architectury-api-419699:5786327"
     compileOnly "curse.maven:lodestone-616457:7264731"
     compileOnly fileTree(dir: 'libs', include: '*.jar')
-    localRuntime "curse.maven:placebo-283644:6926281"
-    localRuntime "curse.maven:ApothicAttributes-898963:6751650"
     localRuntime "curse.maven:architectury-api-419699:5786327"
     localRuntime "curse.maven:lodestone-616457:7264731"
 
