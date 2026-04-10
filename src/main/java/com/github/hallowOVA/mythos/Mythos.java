@@ -11,7 +11,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import team.lodestar.lodestone.handlers.LodestoneRenderHandler;
+import team.lodestar.lodestone.handlers.screenparticle.ScreenParticleHandler;
 
 import java.io.*;
 import java.util.HashSet;
@@ -47,6 +47,10 @@ public class Mythos {
 //    }
 
 
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        ScreenParticleHandler.tickParticles();
+    }
 
     @SubscribeEvent
     public void onCommandsRegister(RegisterCommandsEvent event) {
