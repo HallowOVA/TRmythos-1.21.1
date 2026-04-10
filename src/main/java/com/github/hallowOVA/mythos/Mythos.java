@@ -1,95 +1,58 @@
 package com.github.hallowOVA.mythos;
 
-import com.github.hallowOVA.mythos.client.screen.OrunScreen;
-import com.github.hallowOVA.mythos.command.MythosCommands;
-import com.github.hallowOVA.mythos.config.MythosConfig;
-import com.github.hallowOVA.mythos.config.MythosContagionConfig;
-import com.github.hallowOVA.mythos.config.MythosSkillsConfig;
-import com.github.hallowOVA.mythos.entity.boss.DendrrahEntity;
-import com.github.hallowOVA.mythos.handler.*;
-import com.github.hallowOVA.mythos.networking.MythosNetwork;
-import com.github.hallowOVA.mythos.registry.*;
-import com.github.hallowOVA.mythos.voiceoftheworld.VoiceOfTheWorld;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
+import com.github.hallowOVA.mythos.registry.MythosRegistery;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import team.lodestar.lodestone.handlers.LodestoneRenderHandler;
 
 import java.io.*;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-@Mod("trmythos")
+@Mod("trmythos") @SuppressWarnings("unused")
 public class Mythos {
     public static final String MOD_ID = "trmythos";
     public static final String MOD_VERSION = "v1.26.2.36";
     public static final Logger LOGGER = LogManager.getLogger("trmythos");
 
     public Mythos(IEventBus modEventBus, ModContainer modContainer) {
-        modContainer.registerConfig(ModConfig.Type.SERVER, MythosConfig.SPEC, getConfigFileName("tensura-reincarnated/mythos-common.toml"));
-        modContainer.registerConfig(ModConfig.Type.COMMON, MythosContagionConfig.SPEC, "tensura-reincarnated/mythos-contagion-common.toml");
 
         // 1. Common Listeners
-        modEventBus.addListener(this::onCommonSetup);
         MythosRegistery.register(modEventBus);
-        modEventBus.register(MythosRaces.class);
-        MythosParticles.init(modEventBus);
-        MythosEngravings.init(modEventBus);
-
-        // 2. Common Handlers (No client imports in these!)
-        NeoForge.EVENT_BUS.register(CrimsonTyrantHandler.class);
-        NeoForge.EVENT_BUS.register(KhaosHandler.class);
 
         NeoForge.EVENT_BUS.register(this);
 
 
         // 3. Safe Client Loading via Proxy
         if (FMLEnvironment.dist.isClient()) {
-            ClientOnlyRegistrar.registerClientOnlyEvents(modEventBus);
-            modEventBus.addListener(this::onClientSetup);
+           // ClientOnlyRegistrar.registerClientOnlyEvents(modEventBus);
+           // modEventBus.addListener(this::onClientSetup);
         }
 
-        modEventBus.addListener(this::setupAttributes);
+       // modEventBus.addListener(this::setupAttributes);
         LOGGER.info("Mythos has been loaded!");
     }
 
-    private void setupAttributes(EntityAttributeCreationEvent event) {
-        event.put(MythosEntityTypes.DENDRAHH.get(), DendrrahEntity.createAttributes().build());
-    }
+//    private void setupAttributes(EntityAttributeCreationEvent event) {
+//        event.put(MythosEntityTypes.DENDRAHH.get(), DendrrahEntity.createAttributes().build());
+//    }
+
+
 
     @SubscribeEvent
     public void onCommandsRegister(RegisterCommandsEvent event) {
         LOGGER.info("Mythos: Attempting to register commands...");
-        MythosCommands.register(event.getDispatcher());
+       // MythosCommands.register(event.getDispatcher());
         LOGGER.info("Mythos Commands Registered");
-    }
-
-    @SubscribeEvent
-    public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!MythosSkillsConfig.voice_of_the_world.get()) return;
-
-        Player player = event.getEntity();
-
-        if (player.level().isClientSide) return;
-
-        if (player.tickCount % 10000 == 0 && player instanceof ServerPlayer serverPlayer) {
-            VoiceOfTheWorld.checkAwakeningStatus(serverPlayer); // True Hero and True Demon Lord
-            VoiceOfTheWorld.checkHeroEggOrDemonLordSeed(serverPlayer); // Hero Egg and Demon Lord Seed
-        }
     }
 
     public static Logger getLogger() {
@@ -98,29 +61,6 @@ public class Mythos {
 
     private String getConfigFileName(String name) {
         return String.format("%s/%s.toml", "tensura-reincarnated", name);
-    }
-
-    @SubscribeEvent
-    public void onCommonSetup(FMLCommonSetupEvent event) {
-        LOGGER.info("Common Setup");
-        event.enqueueWork(MythosNetwork::register);
-        if (this.isFirstLaunch()) {
-            this.editTOMLFile();
-            this.editEngravings();
-            this.markAsEdited();
-            LOGGER.info("Common setup works and TOML file was edited.");
-        } else {
-            LOGGER.info("Common setup works. TOML file already edited.");
-        }
-
-    }
-
-    private void onClientSetup(FMLClientSetupEvent event) {
-        MenuScreens.register(MythosMenuTypes.ORUN_MENU.get(), OrunScreen::new);
-        NeoForge.EVENT_BUS.register(YellowSignOverlayHandler.class);
-        NeoForge.EVENT_BUS.register(HaliShaderHandler.class);
-        NeoForge.EVENT_BUS.register(GlobalEffectHandler.class);
-        NeoForge.EVENT_BUS.register(KhaosHandler.class);
     }
 
 
