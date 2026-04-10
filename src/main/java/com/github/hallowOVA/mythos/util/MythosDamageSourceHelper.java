@@ -2,6 +2,7 @@ package com.github.hallowOVA.mythos.util;
 
 import net.minecraft.world.damagesource.DamageSource;
 
+@SuppressWarnings("unused")
 public class MythosDamageSourceHelper {
 
     public MythosDamageSourceHelper() {
