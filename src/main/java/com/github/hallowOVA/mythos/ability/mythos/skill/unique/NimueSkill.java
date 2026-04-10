@@ -20,6 +20,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -28,6 +30,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import team.lodestar.lodestone.registry.common.particle.LodestoneParticleTypes;
 import team.lodestar.lodestone.systems.easing.Easing;
@@ -38,6 +41,9 @@ import team.lodestar.lodestone.systems.particle.data.spin.SpinParticleData;
 
 import java.awt.*;
 import java.util.List;
+
+
+
 
 public class NimueSkill extends Skill {
     public NimueSkill() {
@@ -54,32 +60,34 @@ public class NimueSkill extends Skill {
         return 100000;
     }
 
-    @SubscribeEvent
-    public static void onPlayerTick(PlayerTickEvent.Post event) {
-        Player player = event.getEntity();
-
-        if (player.level().isClientSide || player.isShiftKeyDown() || player.getAbilities().flying) return;
-
-        SkillAPI.getSkillsFrom(player).getSkill(MythosSkills.NIMUE.get()).ifPresent(instance -> {
-
-            BlockPos pos = player.blockPosition();
-            BlockPos belowPos = pos.below();
-            FluidState fluidState = player.level().getFluidState(pos);
-            FluidState fluidBelow = player.level().getFluidState(belowPos);
-
-            if (fluidState.getType() == Fluids.WATER || fluidBelow.getType() == Fluids.WATER) {
-
-                Vec3 motion = player.getDeltaMovement();
-
-                if (motion.y < 0) {
-                    player.setDeltaMovement(motion.x, 0, motion.z);
-                    player.setOnGround(true);
-
-                    player.fallDistance = 0;
-                }
-            }
-        });
+    @Override
+    public boolean canTick(ManasSkillInstance instance, LivingEntity entity) {
+        return true;
     }
+
+    @Override
+    public void onTick(ManasSkillInstance instance, LivingEntity entity) {
+        if (!(entity instanceof Player player)) return;
+        if (player.level().isClientSide) return;
+
+        if (player.tickCount % 2 == 0) return;
+
+        if (player.isInWaterOrBubble()) {
+
+            player.forceAddEffect(new MobEffectInstance(
+                    MobEffects.WATER_BREATHING, 200, 0, false, false, false
+            ), null);
+
+            player.forceAddEffect(new MobEffectInstance(
+                    MobEffects.DOLPHINS_GRACE, 200, 2, false, false, false
+            ), null);
+
+            player.forceAddEffect(new MobEffectInstance(
+                    MobEffects.DAMAGE_RESISTANCE, 200, 1, false, false, false
+            ), null);
+        }
+    }
+
 
     public void onLearnSkill(ManasSkillInstance instance, LivingEntity entity) {
         if (!(instance.getMastery() < (double) 0.0F) && !instance.isTemporarySkill()) {
@@ -141,19 +149,42 @@ public class NimueSkill extends Skill {
             int elementalPoints = 0;
             elementalPoints = instance.getOrCreateTag().getInt("CreationElementalPoints");
 
-            if (elementalPoints >= 50) {
+            boolean isCrouching = player.isShiftKeyDown();
+
+            if (isCrouching && elementalPoints >= 50) {
                 double radius = 15.0;
 
-                List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> e != player);
+                List<LivingEntity> targets = level.getEntitiesOfClass(
+                        LivingEntity.class,
+                        player.getBoundingBox().inflate(radius),
+                        e -> e != player
+                );
 
                 for (LivingEntity target : targets) {
                     purify(target);
+                    spawnPurifyParticles((ServerLevel) level, target, 2);
                 }
+
+
+                elementalPoints -= 50;
+                instance.getOrCreateTag().putInt("CreationElementalPoints", elementalPoints);
+
+                player.displayClientMessage(
+                        Component.literal("Cleansing all spirits...").withStyle(ChatFormatting.AQUA),
+                        true
+                );
+
             } else {
                 Entity target = MythosUtils.getTargetEntity(player, 5);
+
                 if (target instanceof LivingEntity livingTarget) {
                     purify(livingTarget);
-                    player.displayClientMessage(Component.literal("Purifying target...").withStyle(ChatFormatting.BLUE), true);
+
+                    player.displayClientMessage(
+                            Component.literal("Purifying target...").withStyle(ChatFormatting.BLUE),
+                            true
+                    );
+
                     spawnPurifyParticles((ServerLevel) level, livingTarget, 2);
                 }
             }
@@ -164,7 +195,6 @@ public class NimueSkill extends Skill {
     private void purify(LivingEntity entity) {
         if (entity instanceof LivingEntity targetPlayer) {
             IExistence existence = TensuraStorages.getExistenceFrom(targetPlayer);
-            // If the player is a Majin, set them back to Human/Neutral alignment
             if (existence.getAlignment().equals(Alignment.MAJIN)) {
                 existence.setAlignment(Alignment.DEFAULT);
             }
