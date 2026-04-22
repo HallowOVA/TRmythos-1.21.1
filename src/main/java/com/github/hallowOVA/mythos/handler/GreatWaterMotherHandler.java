@@ -1,6 +1,6 @@
-package com.github.hallowOVA.mythos.handler;
+package com.github.hallowova.mythos.handler;
 
-import com.github.hallowOVA.mythos.registry.skill.MythosSkills;
+import com.github.hallowova.mythos.registry.skill.MythosSkills;
 import io.github.manasmods.manascore.skill.api.SkillAPI;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;

@@ -1,4 +1,4 @@
-package com.github.hallowOVA.mythos.util;
+package com.github.hallowova.mythos.util;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;

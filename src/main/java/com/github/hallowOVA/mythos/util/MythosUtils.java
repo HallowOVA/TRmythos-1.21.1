@@ -1,4 +1,4 @@
-package com.github.hallowOVA.mythos.util;
+package com.github.hallowova.mythos.util;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

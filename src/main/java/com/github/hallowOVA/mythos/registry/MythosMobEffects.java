@@ -1,4 +1,4 @@
-package com.github.hallowOVA.mythos.registry;
+package com.github.hallowova.mythos.registry;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;

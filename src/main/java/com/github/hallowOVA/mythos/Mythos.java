@@ -1,6 +1,6 @@
-package com.github.hallowOVA.mythos;
+package com.github.hallowova.mythos;
 
-import com.github.hallowOVA.mythos.registry.MythosRegistery;
+import com.github.hallowova.mythos.registry.MythosRegistery;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -47,10 +47,6 @@ public class Mythos {
 //    }
 
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        ScreenParticleHandler.tickParticles();
-    }
 
     @SubscribeEvent
     public void onCommandsRegister(RegisterCommandsEvent event) {

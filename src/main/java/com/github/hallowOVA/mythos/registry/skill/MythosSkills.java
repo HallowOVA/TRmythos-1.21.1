@@ -1,7 +1,7 @@
-package com.github.hallowOVA.mythos.registry.skill;
+package com.github.hallowova.mythos.registry.skill;
 
 
-import com.github.hallowOVA.mythos.ability.mythos.skill.unique.NimueSkill;
+import com.github.hallowova.mythos.ability.mythos.skill.unique.NimueSkill;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.github.manasmods.manascore.skill.api.ManasSkill;
 import io.github.manasmods.manascore.skill.api.SkillAPI;

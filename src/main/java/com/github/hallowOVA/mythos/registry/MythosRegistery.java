@@ -1,6 +1,6 @@
-package com.github.hallowOVA.mythos.registry;
+package com.github.hallowova.mythos.registry;
 
-import com.github.hallowOVA.mythos.registry.skill.MythosSkills;
+import com.github.hallowova.mythos.registry.skill.MythosSkills;
 import net.neoforged.bus.api.IEventBus;
 
 public class MythosRegistery {

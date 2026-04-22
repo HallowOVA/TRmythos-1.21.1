@@ -1,4 +1,4 @@
-//package com.github.hallowOVA.mythos.registry.dimensions;
+//package com.github.hallowova.mythos.registry.dimensions;
 //
 //import net.minecraft.core.Registry;
 //import net.minecraft.resources.ResourceKey;

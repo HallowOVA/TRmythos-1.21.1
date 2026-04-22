@@ -1,6 +1,6 @@
-package com.github.hallowOVA.mythos.mixin;
+package com.github.hallowova.mythos.mixin;
 
-import com.github.hallowOVA.mythos.registry.skill.MythosSkills;
+import com.github.hallowova.mythos.registry.skill.MythosSkills;
 import io.github.manasmods.tensura.ability.SkillUtils;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
