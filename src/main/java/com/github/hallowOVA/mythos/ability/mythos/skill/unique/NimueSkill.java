@@ -303,6 +303,15 @@ public class NimueSkill extends Skill {
             if (!(entity instanceof Player player)) return;
             if (level.isClientSide) return;
 
+            if (!instance.isMastered(player)) {
+                player.displayClientMessage(
+                        Component.literal("You must master the tides to access higher power...")
+                                .withStyle(ChatFormatting.LIGHT_PURPLE),
+                        true
+                );
+                return;
+            }
+
             CompoundTag tag = instance.getOrCreateTag();
             int points = tag.getInt("CreationElementalPoints");
 
