@@ -312,34 +312,30 @@ public class NimueSkill extends Skill {
             ItemStack held = player.getMainHandItem();
             if (!held.isEmpty()) {
 
-                List<EnchantmentInstance> list =
-                        EnchantmentHelper.getAvailableEnchantmentResults(
-                                30,
-                                held,
-                                level.registryAccess()
-                                        .registry(Registries.ENCHANTMENT)
-                                        .orElseThrow()
-                                        .holders()
-                                        .map(h -> h)
-                        );
+                var enchantmentRegistry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+
+                List<EnchantmentInstance> list = EnchantmentHelper.getAvailableEnchantmentResults(
+                        30,
+                        held,
+                        enchantmentRegistry.holders().map(h -> h)
+                );
 
                 if (!list.isEmpty()) {
-                    EnchantmentInstance enchInstance =
-                            list.get(player.getRandom().nextInt(list.size()));
+                    EnchantmentInstance randomEnch = list.get(player.getRandom().nextInt(list.size()));
 
-                    held.enchant(enchInstance.enchantment, enchInstance.level);
+                    int minLevel = 1;
+
+                    held.enchant(randomEnch.enchantment, minLevel);
 
                     points -= 1000;
                     tag.putInt("CreationElementalPoints", points);
 
                     player.inventoryMenu.broadcastChanges();
-
                     player.displayClientMessage(
                             Component.literal("Lake's Blessing granted.")
                                     .withStyle(ChatFormatting.AQUA),
                             true
                     );
-
                 } else {
                     player.displayClientMessage(
                             Component.literal("This item has reached its limit...")
