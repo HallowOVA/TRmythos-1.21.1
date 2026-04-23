@@ -1,4 +1,4 @@
-package com.github.hallowOVA.mythos.ability.mythos.skill.unique;
+package com.github.hallowova.mythos.ability.mythos.skill.unique;
 
 import com.github.hallowova.mythos.util.MythosUtils;
 import io.github.manasmods.manascore.network.api.util.Changeable;
@@ -43,6 +43,9 @@ import team.lodestar.lodestone.systems.particle.data.spin.SpinParticleData;
 
 import java.awt.*;
 import java.util.List;
+
+
+
 
 public class NimueSkill extends Skill {
     public NimueSkill() {
@@ -121,7 +124,7 @@ public class NimueSkill extends Skill {
     }
 
     @Override
-    public boolean onDamageEntity(ManasSkillInstance instance, LivingEntity owner, LivingEntity target, DamageSource source, Changeable<Float> amount) {
+    public boolean onDamageEntity(ManasSkillInstance instance, LivingEntity owner, LivingEntity target, DamageSource source,  Changeable<Float> amount) {
         float currentAmount = amount.get();
 
         if (owner.isInWater()) {
@@ -151,8 +154,7 @@ public class NimueSkill extends Skill {
             case 2 -> var7777 = "nimue.lilypad_step";
 
             case 3 -> var7777 = "nimue.lake_fairy";
-            default -> var7777 = super.getModeId(instance, mode);
-        }
+                default -> var7777 = super.getModeId(instance, mode); }
         return var7777;
     }
 
@@ -281,6 +283,7 @@ public class NimueSkill extends Skill {
         }
 
 
+
         if (mode == 3) {
             if (!(entity instanceof Player player)) return;
             if (level.isClientSide) return;
@@ -307,44 +310,44 @@ public class NimueSkill extends Skill {
             }
 
             ItemStack held = player.getMainHandItem();
-            if (held.isEmpty()) return;
+            if (!held.isEmpty()) {
 
-            List<EnchantmentInstance> list =
-                    EnchantmentHelper.getAvailableEnchantmentResults(
-                            30,
-                            held,
-                            level.registryAccess()
-                                    .registry(Registries.ENCHANTMENT)
-                                    .orElseThrow()
-                                    .holders()
-                                    .map(h -> h)
+                List<EnchantmentInstance> list =
+                        EnchantmentHelper.getAvailableEnchantmentResults(
+                                30,
+                                held,
+                                level.registryAccess()
+                                        .registry(Registries.ENCHANTMENT)
+                                        .orElseThrow()
+                                        .holders()
+                                        .map(h -> h)
+                        );
+
+                if (!list.isEmpty()) {
+                    EnchantmentInstance enchInstance =
+                            list.get(player.getRandom().nextInt(list.size()));
+
+                    held.enchant(enchInstance.enchantment, enchInstance.level);
+
+                    points -= 1000;
+                    tag.putInt("CreationElementalPoints", points);
+
+                    player.inventoryMenu.broadcastChanges();
+
+                    player.displayClientMessage(
+                            Component.literal("Lake's Blessing granted.")
+                                    .withStyle(ChatFormatting.AQUA),
+                            true
                     );
 
-            if (!list.isEmpty()) {
-                EnchantmentInstance enchInstance =
-                        list.get(player.getRandom().nextInt(list.size()));
-
-                held.enchant(enchInstance.enchantment, 1);
-
-                points -= 200;
-                tag.putInt("CreationElementalPoints", points);
-
-                player.inventoryMenu.broadcastChanges();
-
-                player.displayClientMessage(
-                        Component.literal("Lake's Blessing granted.")
-                                .withStyle(ChatFormatting.AQUA),
-                        true
-                );
-
-            } else {
-                player.displayClientMessage(
-                        Component.literal("This item has reached its limit...")
-                                .withStyle(ChatFormatting.RED),
-                        true
-                );
+                } else {
+                    player.displayClientMessage(
+                            Component.literal("This item has reached its limit...")
+                                    .withStyle(ChatFormatting.RED),
+                            true
+                    );
+                }
             }
-
         }
     }
 
@@ -403,7 +406,6 @@ public class NimueSkill extends Skill {
         }
         return closest;
     }
-
     private BlockPos findWaterRaycast(ServerLevel level, Player player, int range) {
         Vec3 start = player.getEyePosition();
         Vec3 look = player.getLookAngle().normalize();
