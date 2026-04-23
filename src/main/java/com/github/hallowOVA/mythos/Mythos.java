@@ -60,17 +60,17 @@ public class Mythos {
     }
 
     private String getConfigFileName(String name) {
-        return String.format("%s/%s.toml", "tensura-reincarnated", name);
+        return String.format("%s/%s.toml", "tensura", name);
     }
 
 
     private boolean isFirstLaunch() {
-        File markerFile = new File("defaultconfigs/tensura-reincarnated/mythos_first_launch_marker");
+        File markerFile = new File("defaultconfigs/tensura/mythos_first_launch_marker");
         return !markerFile.exists();
     }
 
     private void markAsEdited() {
-        File markerFile = new File("defaultconfigs/tensura-reincarnated/mythos_first_launch_marker");
+        File markerFile = new File("defaultconfigs/tensura/mythos_first_launch_marker");
 
         try {
             if (markerFile.createNewFile()) {
@@ -87,7 +87,7 @@ public class Mythos {
     }
 
     public void editTOMLFile() {
-        File tomlFile = new File("defaultconfigs/tensura-reincarnated/common.toml");
+        File tomlFile = new File("defaultconfigs/tensura/common.toml");
         StringBuilder contentBuilder = new StringBuilder();
 
         try {
@@ -118,10 +118,10 @@ public class Mythos {
 
 
         String content = contentBuilder.toString();
-        String[] newStarting = new String[]{"trmythos:canine", "trmythos:maiden", "trmythos:lesser_serpent", "trmythos:godling", "trmythos:metalloid", "trmythos:revenant", "trmythos:fableborn"};
-        String[] newRandom = new String[]{"trmythos:canine", "trmythos:maiden", "trmythos:lesser_serpent", "trmythos:godling", "trmythos:metalloid", "trmythos:revenant", "trmythos:fableborn"};
-        String[] newSkills = new String[]{"trmythos:omniscient_eye", "trmythos:faker", "trmythos:purity", "trmythos:bloodsucker", "trmythos:profanity", "trmythos:opportunist", "trmythos:sporeblood", "trmythos:fragarach", "trmythos:excalibur", "trmythos:gram", "trmythos:heavens_wrath", "trmythos:zephyros", "trmythos:introvert", "trmythos:stargazer", "trmythos:tenacious", "trmythos:demonologist", "trmythos:sagittarius", "trmythos:npc_life", "trmythos:celestial_path_blue", "trmythos:celestial_cultivation_orange", "trmythos:celestial_mutation_red", "trmythos:author", "trmythos:alchemist", "trmythos:hoarder", "trmythos:pretender_king", "trmythos:false_hero", "trmythos:crimson_arcanist", "trmythos:author", "trmythos:shadow_avenger", "trmythos:worlds_scapegoat"};
-        String[] creatorSkills = new String[]{"trmythos:opportunist", "trmythos:heavens_wrath", "trmythos:zephyros", "trmythos:introvert", "trmythos:stargazer", "trmythos:tenacious", "trmythos:demonologist"};
+        String[] newStarting = new String[]{""};
+        String[] newRandom = new String[]{""};
+        String[] newSkills = new String[]{};
+        String[] creatorSkills = new String[]{""};
         String startingRacesKey = "startingRaces = [";
         String randomRacesKey = "possibleRandomRaces = [";
         String reincarnationSkillsKey = "reincarnationSkills = [";
@@ -157,7 +157,7 @@ public class Mythos {
     }
 
     public void editEngravings() {
-        File tomlFile = new File("defaultconfigs/tensura-reincarnated/common.toml");
+        File tomlFile = new File("defaultconfigs/tensura/common.toml");
         StringBuilder contentBuilder = new StringBuilder();
 
         try {
@@ -190,7 +190,7 @@ public class Mythos {
         var10000 = new String[]{"tensura:dead_end_rainbow"};
         var10000 = new String[]{"tensura:dead_end_rainbow"};
         //  String[] veryRareEngraveNew = new String[]{""};
-        String[] blacklistedEngraveNew = new String[]{"trmythos:vain_of_the_world"};
+        String[] blacklistedEngraveNew = new String[]{""};
         String commonKey = "enchantments.commonEngrave";
         String uncommonKey = "enchantments.uncommonEngrave";
         String rareKey = "enchantments.rareEngrave";
@@ -331,7 +331,7 @@ public class Mythos {
 
                     newEnchantmentsLine.append("]");
                     String var10000 = content.substring(0, enchantmentsLineStart);
-                    return var10000 + newEnchantmentsLine.toString() + content.substring(lineEnd + 1);
+                    return var10000 + newEnchantmentsLine + content.substring(lineEnd + 1);
                 }
             }
         }
