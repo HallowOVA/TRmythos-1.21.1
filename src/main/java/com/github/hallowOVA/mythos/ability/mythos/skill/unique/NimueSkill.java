@@ -315,9 +315,9 @@ public class NimueSkill extends Skill {
             CompoundTag tag = instance.getOrCreateTag();
             int points = tag.getInt("CreationElementalPoints");
 
-            if (points < 200) {
+            if (points < 1000) {
                 player.displayClientMessage(
-                        Component.literal("You lack sufficient creation energy... (200 required)")
+                        Component.literal("You lack sufficient creation energy... (Max required)")
                                 .withStyle(ChatFormatting.RED),
                         true
                 );
@@ -344,7 +344,7 @@ public class NimueSkill extends Skill {
 
                     held.enchant(enchInstance.enchantment, enchInstance.level);
 
-                    points -= 200;
+                    points -= 1000;
                     tag.putInt("CreationElementalPoints", points);
 
                     player.inventoryMenu.broadcastChanges();
