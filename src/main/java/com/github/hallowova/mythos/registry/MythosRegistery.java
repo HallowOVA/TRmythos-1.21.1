@@ -9,7 +9,7 @@ public class MythosRegistery {
 
     public static void register(IEventBus modEventBus) {
         MythosSkills.init(modEventBus);
-        MythosMobEffects.register(modEventBus);
+        MythosMobEffects.init();
         //MythosClient.clientSetup((FMLClientSetupEvent) modEventBus);
         //modEventBus.addListener(MythosClient::clientSetup);
     }
