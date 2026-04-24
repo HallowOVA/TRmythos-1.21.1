@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.github.hallowOVA.mythos.mixin",
+  "package": "com.github.hallowova.mythos.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "trmythos.refmap.json",
   "mixins": [
