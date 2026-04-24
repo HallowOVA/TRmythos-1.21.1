@@ -13,7 +13,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;
 
 public class MythosSkills {
-    private static final DeferredRegister<ManasSkill> registery = DeferredRegister.create(SkillAPI.getSkillRegistryKey(), "trmythos");
+    private static final DeferredRegister<ManasSkill> registry = DeferredRegister.create(SkillAPI.getSkillRegistryKey(), "trmythos");
 
     public MythosSkills() {
     }
@@ -24,7 +24,7 @@ public class MythosSkills {
 
 
     public static void init(IEventBus modEventBus) {
-        registery.register(modEventBus);
+        registry.register(modEventBus);
     }
 
     public static final RegistrySupplier<ManasSkill> NIMUE = register("nimue", NimueSkill::new);
