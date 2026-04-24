@@ -1,7 +1,7 @@
 package com.github.hallowova.mythos.registry.skill;
 
 
-import com.github.hallowova.mythos.ability.mythos.skill.unique.FakerSkill;
+import com.github.hallowova.mythos.ability.mythos.skill.unique.CrimsonSkill;
 import com.github.hallowova.mythos.ability.mythos.skill.unique.NimueSkill;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.github.manasmods.manascore.skill.api.ManasSkill;
@@ -29,5 +29,6 @@ public class MythosSkills {
     }
 
     public static final RegistrySupplier<ManasSkill> NIMUE = register("nimue", NimueSkill::new);
+    public static final RegistrySupplier<ManasSkill> CRIMSON = register("crimson", CrimsonSkill::new);
     public static final RegistrySupplier<ManasSkill> FAKER = register("faker", FakerSkill::new);
 }
