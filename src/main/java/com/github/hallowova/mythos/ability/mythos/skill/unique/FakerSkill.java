@@ -1,369 +1,280 @@
-//package com.github.hallowova.mythos.ability.mythos.skill.unique;
-//
-//
-//import com.github.hallowova.mythos.registry.MythosMobEffects;
-//import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
-//import io.github.manasmods.tensura.ability.skill.Skill;
-//import io.github.manasmods.tensura.ability.skill.extra.ThoughtAccelerationSkill;
-//import net.minecraft.ChatFormatting;
-//import net.minecraft.core.Registry;
-//import net.minecraft.nbt.CompoundTag;
-//import net.minecraft.network.chat.Component;
-//import net.minecraft.network.chat.MutableComponent;
-//import net.minecraft.network.chat.Style;
-//import net.minecraft.resources.ResourceLocation;
-//import net.minecraft.sounds.SoundEvents;
-//import net.minecraft.sounds.SoundSource;
-//import net.minecraft.world.InteractionHand;
-//import net.minecraft.world.effect.MobEffectInstance;
-//import net.minecraft.world.entity.LivingEntity;
-//import net.minecraft.world.entity.player.Player;
-//import net.minecraft.world.item.ItemStack;
-//
-//import java.util.Optional;
-//import java.util.UUID;
-//
-//public class FakerSkill extends Skill {
-//    public FakerSkill() {
-//        super(SkillType.UNIQUE);
-//    }
-//
-//    protected static final UUID ACCELERATION =
-//            UUID.fromString("0147c153-32a2-4524-8ba3-ba4c2f449d7c");
-//
-//
-//    public double getObtainingEpCost() {
-//        return 100000.0;
-//    }
-//
-//    public double learningCost() {
-//        return 1000.0;
-//    }
-//
-//    @Override
-//    public int getMaxMastery() {
-//        return 3000;
-//    }
-//
-//
-//
-//    /* =========================================================
-//     * TOGGLE ON
-//     * ========================================================= */
-//    @Override
-//    public void onToggleOn(ManasSkillInstance instance, LivingEntity entity) {
-//
-//        if (!entity.hasEffect(MythosMobEffects.AVALON_REGENERATION)) {
-//
-//            entity.addEffect(
-//                    new MobEffectInstance(
-//                            MythosMobEffects.AVALON_REGENERATION,
-//                            220,
-//                            1,
-//                            false,
-//                            false,
-//                            false
-//                    )
-//            );
-//        }
-//    }
-//
-//
-//    @Override
-//    public void onToggleOff(ManasSkillInstance instance, LivingEntity entity) {
-//
-//        MobEffectInstance effect =
-//                entity.getEffect(MythosMobEffects.AVALON_REGENERATION);
-//
-//        if (effect != null && effect.getAmplifier() < 1) {
-//            entity.removeEffect(MythosMobEffects.AVALON_REGENERATION);
-//        }
-//    }
-//
-//    /* =========================================================
-//     * TICK
-//     * ========================================================= */
-//    @Override
-//    public void onTick(ManasSkillInstance instance, LivingEntity entity) {
-//
-//        grantSevererIfMastered(instance, entity);
-//
-//        if (instance.isToggled()) {
-//
-//            if (!entity.hasEffect(MythosMobEffects.AVALON_REGENERATION)) {
-//
-//                entity.addEffect(
-//                        new MobEffectInstance(
-//                                MythosMobEffects.AVALON_REGENERATION,
-//                                220,
-//                                1,
-//                                false,
-//                                false,
-//                                false
-//                        )
-//                );
-//            }
-//        }
-//    }
-//
-//    /* =========================================================
-//     * SEVERER GRANT
-//     * ========================================================= */
-//    private void grantSevererIfMastered(ManasSkillInstance instance, LivingEntity entity) {
-//
-//        if (!(entity instanceof Player player)) return;
-//        if (entity.level().isClientSide()) return;
-//        if (!this.isMastered(instance, entity)) return;
-//
-//        SkillStorage storage = SkillAPI.getSkillsFrom(player);
-//
-//        if (storage.getSkill(UniqueSkills.SEVERER.get()).isPresent()) return;
-//
-//        storage.learnSkill(UniqueSkills.SEVERER.get());
-//
-//        player.displayClientMessage(
-//                Component.translatable("trmythos.skill.faker.mastered.grant.severer")
-//                        .withStyle(ChatFormatting.GOLD),
-//                false
-//        );
-//
-//        player.level().playSound(
-//                null,
-//                player.getX(),
-//                player.getY(),
-//                player.getZ(),
-//                SoundEvents.PLAYER_LEVELUP,
-//                SoundSource.PLAYERS,
-//                1.0F,
-//                1.2F
-//        );
-//
-//        TensuraSkillCapability.sync(player);
-//    }
-//
-//    /* =========================================================
-//     * MODES
-//     * ========================================================= */
-//    public int modes() {
-//        return 3;
-//    }
-//
-//    public int nextMode(LivingEntity entity, TensuraSkillInstance instance, boolean reverse) {
-//
-//        if (reverse) {
-//            return (instance.getMode() == 1) ? 3 : instance.getMode() - 1;
-//        } else {
-//            return (instance.getMode() == 3) ? 1 : instance.getMode() + 1;
-//        }
-//    }
-//
-//    public Component getModeName(int mode) {
-//
-//        return switch (mode) {
-//            case 1 -> Component.translatable("trmythos.skill.mode.faker.analytical_appraisal");
-//            case 2 -> Component.translatable("trmythos.skill.mode.faker.reinforcement");
-//            case 3 -> Component.translatable("trmythos.skill.mode.faker.projection");
-//            default -> Component.empty();
-//        };
-//    }
-//
-//    /* =========================================================
-//     * PRESS ACTION
-//     * ========================================================= */
-//    @Override
-//    public void onPressed(ManasSkillInstance instance, LivingEntity entity) {
-//
-//        switch (instance.getMode()) {
-//
-//            /* =======================
-//             * MODE 1: ANALYSIS
-//             * ======================= */
-//            case 1 -> {
-//
-//                if (!(entity instanceof Player player)) return;
-//                if (SkillHelper.outOfMagicule(entity, instance)) return;
-//
-//                TensuraSkillCapability.getFrom(player).ifPresent(cap -> {
-//
-//                    if (player.isCrouching()) {
-//
-//                        int mode = cap.getAnalysisMode();
-//
-//                        switch (mode) {
-//                            case 1 -> {
-//                                cap.setAnalysisMode(2);
-//                                player.displayClientMessage(
-//                                        Component.translatable("tensura.skill.analytical.analyzing_mode.block")
-//                                                .withStyle(ChatFormatting.DARK_AQUA),
-//                                        true
-//                                );
-//                            }
-//                            case 2 -> {
-//                                cap.setAnalysisMode(0);
-//                                player.displayClientMessage(
-//                                        Component.translatable("tensura.skill.analytical.analyzing_mode.both")
-//                                                .withStyle(ChatFormatting.DARK_AQUA),
-//                                        true
-//                                );
-//                            }
-//                            default -> {
-//                                cap.setAnalysisMode(1);
-//                                player.displayClientMessage(
-//                                        Component.translatable("tensura.skill.analytical.analyzing_mode.entity")
-//                                                .withStyle(ChatFormatting.DARK_AQUA),
-//                                        true
-//                                );
-//                            }
-//                        }
-//
-//                        player.playNotifySound(
-//                                SoundEvents.ENCHANTMENT_TABLE_USE,
-//                                SoundSource.PLAYERS,
-//                                1.0F,
-//                                1.0F
-//                        );
-//
-//                        TensuraSkillCapability.sync(player);
-//
-//                    } else {
-//
-//                        int level = this.isMastered(instance, entity) ? 18 : 8;
-//
-//                        if (cap.getAnalysisLevel() != level) {
-//
-//                            cap.setAnalysisLevel(level);
-//                            cap.setAnalysisDistance(this.isMastered(instance, entity) ? 30 : 20);
-//
-//                        } else {
-//                            cap.setAnalysisLevel(0);
-//                        }
-//
-//                        player.level().playSound(
-//                                null,
-//                                player.blockPosition(),
-//                                SoundEvents.ENCHANTMENT_TABLE_USE,
-//                                SoundSource.PLAYERS,
-//                                1.0F,
-//                                1.0F
-//                        );
-//
-//                        TensuraSkillCapability.sync(player);
-//                    }
-//                });
-//            }
-//
-//            /* =======================
-//             * MODE 2: REINFORCE
-//             * ======================= */
-//            case 2 -> {
-//
-//                if (!(entity instanceof Player player)) return;
-//                if (SkillHelper.outOfMagicule(entity, instance)) return;
-//
-//                ItemStack mainHand = entity.getMainHandItem();
-//                if (mainHand.isEmpty()) return;
-//
-//                reinforce(instance, entity, InteractionHand.MAIN_HAND);
-//
-//                instance.setCoolDown(this.isMastered(instance, entity) ? 60 : 120);
-//                addMasteryPoint(instance, entity);
-//            }
-//
-//            /* =======================
-//             * MODE 3: PROJECTION
-//             * ======================= */
-//            case 3 -> {
-//
-//                if (!(entity instanceof Player player)) return;
-//                if (SkillHelper.outOfMagicule(entity, instance)) return;
-//
-//                performProjection(instance, player);
-//            }
-//        }
-//    }
-//
-//    /* =========================================================
-//     * PROJECTION (unchanged logic, API-safe)
-//     * ========================================================= */
-//    private void performProjection(ManasSkillInstance instance, Player caster) {
-//
-//        if (caster.level().isClientSide()) return;
-//
-//        double range = 30;
-//
-//        var eye = caster.getEyePosition();
-//        var look = caster.getViewVector(1.0F);
-//
-//        var end = eye.add(look.scale(range));
-//
-//        var box = caster.getBoundingBox().inflate(range);
-//
-//        var hit = caster.level().getNearestEntity(
-//                caster.level().getEntitiesOfClass(LivingEntity.class, box,
-//                        e -> e != caster && !e.getMainHandItem().isEmpty()),
-//                caster
-//        );
-//
-//        if (hit == null) {
-//            caster.displayClientMessage(
-//                    Component.translatable("trmythos.skill.faker.projection.no_target")
-//                            .withStyle(ChatFormatting.RED),
-//                    true
-//            );
-//            return;
-//        }
-//
-//        ItemStack targetItem = hit.getMainHandItem();
-//        if (targetItem.isEmpty()) return;
-//
-//        ItemStack copy = targetItem.copy();
-//        copy.setCount(1);
-//
-//        CompoundTag tag = copy.getOrCreateTag();
-//        tag.putBoolean("IsProjection", true);
-//        tag.putUUID("ProjectedBy", caster.getUUID());
-//
-//        if (caster.getMainHandItem().isEmpty()) {
-//            caster.setItemInHand(InteractionHand.MAIN_HAND, copy);
-//        } else {
-//            caster.getInventory().add(copy);
-//        }
-//
-//        caster.displayClientMessage(
-//                Component.translatable("trmythos.skill.faker.projection.success")
-//                        .withStyle(ChatFormatting.GOLD),
-//                true
-//        );
-//
-//        instance.setCoolDown(120);
-//        addMasteryPoint(instance, caster);
-//    }
-//
-//    /* =========================================================
-//     * REINFORCEMENT (kept simplified but safe)
-//     * ========================================================= */
-//    private void reinforce(ManasSkillInstance instance, LivingEntity entity, InteractionHand hand) {
-//
-//        ItemStack item = entity.getItemInHand(hand);
-//        if (item.isEmpty()) return;
-//
-//        item.getOrCreateTag().putBoolean("Unbreakable", true);
-//
-//        entity.setItemInHand(hand, item);
-//        entity.swing(hand);
-//
-//        entity.level().playSound(
-//                null,
-//                entity.blockPosition(),
-//                SoundEvents.ENCHANTMENT_TABLE_USE,
-//                SoundSource.PLAYERS,
-//                1.0F,
-//                1.0F
-//        );
-//    }
-//
-//    @Override
-//    public boolean canBeToggled(ManasSkillInstance instance, LivingEntity living) {
-//        return instance.isMastered(living);
-//    }
-//}
+package com.github.hallowova.mythos.ability.mythos.skill.unique;
+
+import com.github.hallowova.mythos.config.FakerConfig;
+import com.github.hallowova.mythos.registry.MythosMobEffects;
+import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
+import io.github.manasmods.manascore.skill.api.SkillAPI;
+import io.github.manasmods.manascore.skill.impl.SkillStorage;
+import io.github.manasmods.tensura.ability.skill.Skill;
+import io.github.manasmods.tensura.registry.skill.UniqueSkills;
+import io.github.manasmods.tensura.util.AttributeHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+
+import java.util.UUID;
+
+public class FakerSkill extends Skill {
+
+    private static final FakerConfig CONFIG = new FakerConfig();
+
+    protected static final UUID ACCELERATION =
+            UUID.fromString("0147c153-32a2-4524-8ba3-ba4c2f449d7c");
+    private static final String TAG_ANALYSIS_MODE = "AnalysisMode";
+    private static final String TAG_ANALYSIS_ACTIVE = "AnalysisActive";
+
+    public FakerSkill() {
+        super(SkillType.UNIQUE);
+    }
+
+    public double getObtainingEpCost() {
+        return 100000.0;
+    }
+
+    public double learningCost() {
+        return 1000.0;
+    }
+
+    public int getMaxMastery() {
+        return 3000;
+    }
+
+    /* ================= TOGGLE ================= */
+
+    public void onToggleOn(ManasSkillInstance instance, LivingEntity entity) {
+        entity.addEffect(new MobEffectInstance(
+                MythosMobEffects.AVALON_REGENERATION,
+                220, 1, false, false, false
+        ));
+    }
+
+    public void onToggleOff(ManasSkillInstance instance, LivingEntity entity) {
+        entity.removeEffect(MythosMobEffects.AVALON_REGENERATION);
+    }
+
+    /* ================= TICK ================= */
+
+    public void onTick(ManasSkillInstance instance, LivingEntity entity) {
+
+        grantSevererIfMastered(instance, entity);
+
+        if (instance.isToggled()) {
+            entity.addEffect(new MobEffectInstance(
+                    MythosMobEffects.AVALON_REGENERATION,
+                    220, 1, false, false, false
+            ));
+        }
+    }
+
+    /* ================= SEVERER ================= */
+
+    private void grantSevererIfMastered(ManasSkillInstance instance, LivingEntity entity) {
+
+        if (!(entity instanceof Player player)) return;
+        if (entity.level().isClientSide()) return;
+        if (!this.isMastered(instance, entity)) return;
+
+        SkillStorage storage = SkillAPI.getSkillsFrom(player);
+
+        if (storage.getSkill(UniqueSkills.SEVERER.get()).isPresent()) return;
+
+        storage.learnSkill(UniqueSkills.SEVERER.get());
+
+        player.displayClientMessage(
+                Component.literal("You have acquired Severer!")
+                        .withStyle(ChatFormatting.GOLD),
+                false
+        );
+
+        player.level().playSound(
+                null,
+                player.getX(), player.getY(), player.getZ(),
+                SoundEvents.PLAYER_LEVELUP,
+                SoundSource.PLAYERS,
+                1.0F, 1.2F
+        );
+    }
+
+    /* ================= MODES ================= */
+
+    public int getMode(ManasSkillInstance instance) {
+        CompoundTag tag = instance.getOrCreateTag();
+        if (!tag.contains("Mode")) tag.putInt("Mode", 1);
+        return tag.getInt("Mode");
+    }
+
+    public void nextMode(ManasSkillInstance instance) {
+        int mode = getMode(instance);
+        mode = mode >= 3 ? 1 : mode + 1;
+        instance.getOrCreateTag().putInt("Mode", mode);
+    }
+
+    /* ================= PRESS ================= */
+
+    public void onPressed(ManasSkillInstance instance, LivingEntity entity) {
+
+        int mode = getMode(instance);
+
+        switch (mode) {
+
+            /* ================= ANALYSIS ================= */
+            case 1 -> {
+
+                if (!(entity instanceof ServerPlayer player)) return;
+
+                CompoundTag data = instance.getOrCreateTag();
+
+                // SHIFT = change mode
+                if (player.isShiftKeyDown()) {
+
+                    int analysisMode = data.getInt(TAG_ANALYSIS_MODE);
+
+                    analysisMode = switch (analysisMode) {
+                        case 1 -> 2;
+                        case 2 -> 3;
+                        default -> 1;
+                    };
+
+                    data.putInt(TAG_ANALYSIS_MODE, analysisMode);
+
+                    Component msg = switch (analysisMode) {
+                        case 1 -> Component.literal("Analysis Mode: Entity").withStyle(ChatFormatting.AQUA);
+                        case 2 -> Component.literal("Analysis Mode: Block").withStyle(ChatFormatting.AQUA);
+                        case 3 -> Component.literal("Analysis Mode: Both").withStyle(ChatFormatting.AQUA);
+                        default -> Component.literal("Analysis Mode: Unknown").withStyle(ChatFormatting.AQUA);
+                    };
+
+                    player.displayClientMessage(msg, true);
+                    player.playNotifySound(
+                            SoundEvents.EXPERIENCE_ORB_PICKUP,
+                            SoundSource.PLAYERS,
+                            1.0F,
+                            1.0F
+                    );
+
+                    return;
+                }
+
+                // NORMAL PRESS = toggle analysis
+                boolean active = data.getBoolean(TAG_ANALYSIS_ACTIVE);
+
+                if (active) {
+                    AttributeHelper.removeAnalysisAttributes(player, true, true, false);
+                    data.putBoolean(TAG_ANALYSIS_ACTIVE, false);
+
+                    player.displayClientMessage(
+                            Component.literal("Analysis Disabled").withStyle(ChatFormatting.RED),
+                            true
+                    );
+                } else {
+                    int level = isMastered(instance, entity)
+                            ? CONFIG.analysisLevelMastered
+                            : CONFIG.analysisLevel;
+
+                    AttributeHelper.addAnalysisAttributes(player, level, 30);
+
+                    data.putBoolean(TAG_ANALYSIS_ACTIVE, true);
+
+                    player.displayClientMessage(
+                            Component.literal("Analysis Enabled").withStyle(ChatFormatting.GREEN),
+                            true
+                    );
+                }
+
+                player.playNotifySound(
+                        SoundEvents.EXPERIENCE_ORB_PICKUP,
+                        SoundSource.PLAYERS,
+                        1.0F,
+                        1.0F
+                );
+            }
+
+            /* ================= REINFORCEMENT ================= */
+            case 2 -> reinforce(instance, entity);
+
+            /* ================= PROJECTION ================= */
+            case 3 -> {
+                if (entity instanceof Player player) {
+                    project(instance, player);
+                }
+            }
+        }
+    }
+
+    /* ================= REINFORCE ================= */
+
+    private void reinforce(ManasSkillInstance instance, LivingEntity entity) {
+
+        if (!(entity instanceof Player player)) return;
+
+        ItemStack item = player.getMainHandItem();
+        if (item.isEmpty()) return;
+
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Unbreakable", true);
+
+        item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        instance.setCoolDown(1, 100);
+    }
+
+    /* ================= PROJECTION ================= */
+
+    private void project(ManasSkillInstance instance, Player caster) {
+
+        double range = 30;
+
+        Vec3 eye = caster.getEyePosition();
+        Vec3 look = caster.getViewVector(1.0F);
+        Vec3 end = eye.add(look.scale(range));
+
+        AABB box = caster.getBoundingBox().inflate(range);
+
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(
+                caster,
+                eye,
+                end,
+                box,
+                e -> e instanceof LivingEntity living &&
+                        living != caster &&
+                        !living.getMainHandItem().isEmpty(),
+                range * range
+        );
+
+        if (hit == null || !(hit.getEntity() instanceof LivingEntity target)) {
+            caster.displayClientMessage(Component.literal("No target!").withStyle(ChatFormatting.RED), true);
+            return;
+        }
+
+        ItemStack copy = target.getMainHandItem().copy();
+        copy.setCount(1);
+
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Projection", true);
+
+        copy.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+
+        caster.getInventory().add(copy);
+
+        caster.displayClientMessage(Component.literal("Projected item!").withStyle(ChatFormatting.GOLD), true);
+
+        instance.setCoolDown(2, 120);
+    }
+
+    public boolean canBeToggled(ManasSkillInstance instance, LivingEntity living) {
+        return this.isMastered(instance, living);
+    }
+}

@@ -3,6 +3,7 @@ package com.github.hallowova.mythos.registry.skill;
 
 import com.github.hallowova.mythos.ability.mythos.skill.unique.CrimsonSkill;
 import com.github.hallowova.mythos.ability.mythos.skill.unique.NimueSkill;
+import com.github.hallowova.mythos.ability.mythos.skill.unique.FakerSkill;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.github.manasmods.manascore.skill.api.ManasSkill;
 import io.github.manasmods.manascore.skill.api.SkillAPI;
