@@ -20,7 +20,7 @@ public class FakerConfig extends ManasConfig {
     public int analysisLevelMastered = 18;
 
     @Comment("Modification limits")
-    public int reinforceOvercapLevel = 10;
+    public int reinforceOvercapLevel = 5;
     public boolean allowOvercap = true;
 
     @Comment("Reinforce Cooldown")
