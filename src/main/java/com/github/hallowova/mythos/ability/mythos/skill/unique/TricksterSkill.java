@@ -322,7 +322,7 @@ public class TricksterSkill extends Skill {
                             TensuraMobEffects.getReference(
                                     TensuraMobEffects.HYPNOSIS),
                             200,
-                            1,
+                            3,
                             false,
                             true,
                             true
@@ -332,7 +332,7 @@ public class TricksterSkill extends Skill {
                             TensuraMobEffects.getReference(
                                     TensuraMobEffects.FEAR),
                             200,
-                            1,
+                            8,
                             false,
                             true,
                             true
@@ -342,7 +342,7 @@ public class TricksterSkill extends Skill {
                             TensuraMobEffects.getReference(
                                     TensuraMobEffects.INSANITY),
                             200,
-                            1,
+                            3,
                             false,
                             true,
                             true
