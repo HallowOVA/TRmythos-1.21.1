@@ -6,6 +6,9 @@ import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
 import io.github.manasmods.manascore.skill.api.SkillAPI;
 import io.github.manasmods.manascore.skill.impl.SkillStorage;
 import io.github.manasmods.tensura.ability.skill.Skill;
+import io.github.manasmods.manascore.skill.api.ManasSkill;
+import io.github.manasmods.tensura.ability.SkillHelper;
+import io.github.manasmods.tensura.ability.TensuraSkillInstance;
 import io.github.manasmods.tensura.enchantment.TensuraEnchantments;
 import io.github.manasmods.tensura.registry.skill.UniqueSkills;
 import io.github.manasmods.tensura.util.AttributeHelper;
@@ -77,29 +80,21 @@ public class FakerSkill extends Skill {
 
     @Override
     public void onTick(ManasSkillInstance instance, LivingEntity entity) {
-        grantSevererIfMastered(instance, entity);
-
         if (instance.isToggled()) {
             entity.addEffect(new MobEffectInstance(MythosMobEffects.AVALON_REGENERATION, 220, 1, false, false, false));
         }
     }
 
 
-    private void grantSevererIfMastered(ManasSkillInstance instance, LivingEntity entity) {
+    @Override
+    public void onSkillMastered(ManasSkillInstance instance, LivingEntity entity) {
+        if (instance.isSubInstance()) return;
 
-        if (!(entity instanceof Player player)) return;
-        if (entity.level().isClientSide()) return;
-        if (!this.isMastered(instance, entity)) return;
+        TensuraSkillInstance skill = new TensuraSkillInstance((ManasSkill) UniqueSkills.SEVERER.get());
 
-        SkillStorage storage = SkillAPI.getSkillsFrom(player);
+        skill.setMastery(((Skill) UniqueSkills.SEVERER.get()).getAcquirementMastery(entity));
 
-        if (storage.getSkill(UniqueSkills.SEVERER.get()).isPresent()) return;
-
-        storage.learnSkill(UniqueSkills.SEVERER.get());
-
-        player.displayClientMessage(Component.literal("You have acquired Severer!").withStyle(ChatFormatting.GOLD), false);
-
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.2F);
+        SkillHelper.learnSkill(entity, (ManasSkillInstance) skill);
     }
 
 
