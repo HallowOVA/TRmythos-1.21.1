@@ -172,22 +172,24 @@ public class TricksterSkill extends Skill {
 
     @Override
     public String getModeId(ManasSkillInstance instance, int mode) {
-        switch (mode) {
-            case 0:
-                return "mythos.skill.mode.trickster.vanishing_act";
+        return switch (mode) {
+            case 0 -> "trickster.vanishing_act";
+            case 1 -> "trickster.place_swap";
+            case 2 -> "trickster.horrific_fantasy";
+            case 3 -> "trickster.mimicry";
+            default -> super.getModeId(instance, mode);
+        };
+    }
 
-            case 1:
-                return "mythos.skill.mode.trickster.place_swap";
-
-            case 2:
-                return "mythos.skill.mode.trickster.horrific_fantasy";
-
-            case 3:
-                return "mythos.skill.mode.trickster.mimicry";
-
-            default:
-                return super.getModeId(instance, mode);
-        }
+    @Override
+    public double getMagiculeCost(LivingEntity entity, ManasSkillInstance instance, int mode) {
+        return switch (mode) {
+            case 0 -> 15000.0D;
+            case 1 -> 15000.0D;
+            case 2 -> 50000.0D;
+            case 3 -> 50000.0D;
+            default -> 0.0D;
+        };
     }
 
     @Override
@@ -273,7 +275,7 @@ public class TricksterSkill extends Skill {
 
 
                 instance.addMasteryPoint(entity);
-
+                instance.setCoolDown(20 * 2, 0);
                 break;
             case 1:
 
@@ -317,7 +319,7 @@ public class TricksterSkill extends Skill {
                 );
 
                 instance.addMasteryPoint(entity);
-
+                instance.setCoolDown(5, 1);
                 break;
             case 2:
 
@@ -371,7 +373,7 @@ public class TricksterSkill extends Skill {
                 );
 
                 instance.addMasteryPoint(entity);
-
+                instance.setCoolDown(0, 2);
                 break;
             case 3:
 
@@ -424,7 +426,7 @@ public class TricksterSkill extends Skill {
                 );
 
                 instance.addMasteryPoint(entity);
-
+                instance.setCoolDown(20 * 10, 3);
                 break;
         }
     }
