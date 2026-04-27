@@ -2,9 +2,11 @@ package com.github.hallowova.mythos.ability.mythos.skill.unique;
 
 import io.github.manasmods.manascore.skill.api.ManasSkill;
 import io.github.manasmods.manascore.skill.api.ManasSkillInstance;
+import io.github.manasmods.tensura.ability.SkillUtils;
 import io.github.manasmods.tensura.ability.skill.Skill;
 import io.github.manasmods.tensura.registry.attribute.TensuraAttributes;
 import io.github.manasmods.tensura.registry.effect.TensuraMobEffects;
+import io.github.manasmods.tensura.registry.skill.UniqueSkills;
 import io.github.manasmods.tensura.registry.sound.TensuraSoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
@@ -51,6 +53,10 @@ public class TricksterSkill extends Skill {
     @Override
     public double getAcquiringMagiculeCost(ManasSkillInstance instance) {
         return 500000;
+    }
+
+    public boolean checkAcquiringRequirement(Player entity, double newEP) {
+        return SkillUtils.isSkillMastered((LivingEntity)entity, (ManasSkill) UniqueSkills.FALSIFIER.get());
     }
 
     public boolean canBeToggled(ManasSkillInstance instance, LivingEntity living) {
@@ -164,20 +170,24 @@ public class TricksterSkill extends Skill {
         return (mode == 3) ? 0 : (mode + 1);
     }
 
+    @Override
     public String getModeId(ManasSkillInstance instance, int mode) {
         switch (mode) {
             case 0:
+                return "mythos.skill.mode.trickster.vanishing_act";
 
             case 1:
+                return "mythos.skill.mode.trickster.place_swap";
 
             case 2:
+                return "mythos.skill.mode.trickster.horrific_fantasy";
 
             case 3:
+                return "mythos.skill.mode.trickster.mimicry";
 
+            default:
+                return super.getModeId(instance, mode);
         }
-        return
-
-                super.getModeId(instance, mode);
     }
 
     @Override

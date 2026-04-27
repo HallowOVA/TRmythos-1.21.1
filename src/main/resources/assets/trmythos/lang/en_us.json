@@ -135,6 +135,14 @@
   "trmythos.skill.zephyros.burst": "Overpressure Burst",
   "trmythos.skill.zephyros.wind": "Wind Breath",
 
+  "mythos.skill.trickster": "Trickster",
+  "mythos.skill.trickster.description": "Take hold of the target's senses, allowing you to form illusions which could be mistaken for reality... They may fear you for it now, but they'll come to realize it's all in good fun!",
+
+  "mythos.skill.mode.trickster.vanishing_act": "Vanishing Act",
+  "mythos.skill.mode.trickster.place_swap": "Place Swap",
+  "mythos.skill.mode.trickster.horrific_fantasy": "Horrific Fantasy",
+  "mythos.skill.mode.trickster.mimicry": "Mimicry",
+
   "mythos.skill.faker": "§cFaker",
   "mythos.skill.faker.description": "Analysis, Projection, Reinforcement. Though shallow copies of what others wield, these items fit perfectly in your hand. Nurture them. Mend them. Perhaps one day, they may even surpass their originals.",
   "mythos.skill.mode.faker.analytical_appraisal" : "§4Tracing",
