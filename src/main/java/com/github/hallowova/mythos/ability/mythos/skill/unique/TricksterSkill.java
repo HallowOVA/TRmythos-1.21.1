@@ -275,7 +275,7 @@ public class TricksterSkill extends Skill {
 
 
                 instance.addMasteryPoint(entity);
-                instance.setCoolDown(20 * 2, 0);
+                instance.setCoolDown(5, 0);
                 break;
             case 1:
 

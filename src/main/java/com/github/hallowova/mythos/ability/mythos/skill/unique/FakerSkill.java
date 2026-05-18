@@ -15,6 +15,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -29,11 +30,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Predicate;
 
 public class FakerSkill extends Skill {
+
+    public @Nullable ResourceLocation getSkillIcon() {
+        return ResourceLocation.fromNamespaceAndPath("trmythos", "textures/skill/unique/faker.png");
+    }
 
     private static final FakerConfig CONFIG = new FakerConfig();
 
@@ -237,13 +243,13 @@ public class FakerSkill extends Skill {
         }
 
         String itemId = BuiltInRegistries.ITEM.getKey(targetItem.getItem()).toString();
-        boolean isRestricted = MythosSkillsConfig.getFakerSkillRestrictedItems().contains(itemId);
+//        boolean isRestricted = MythosSkillsConfig.getFakerSkillRestrictedItems().contains(itemId);
 
         int enchantmentLevel =
                 targetItem.getEnchantmentLevel(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(TensuraEnchantments.TSUKUMOGAMI));
         boolean hasTsukumogami = enchantmentLevel > 0;
 
-        if (hasTsukumogami || isRestricted) {
+        if (hasTsukumogami) {
             String translationKey = hasTsukumogami
                     ? "trmythos.skill.faker.projection.fail.tsukumogami"
                     : "trmythos.skill.faker.projection.fail.restricted";
